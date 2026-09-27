@@ -39,8 +39,8 @@
                             @if(request()->has('category'))
                                 <a href="{{ url('categories') }}"
                                    class="back-btn"
-                                   aria-label="Vissza a kategóriákhoz">
-                                    ← Vissza
+                                   aria-label="{{ trans('labels.back_to_categories') }}">
+                                    ← {{ trans('labels.back') }}
                                 </a>
                             @endif
 

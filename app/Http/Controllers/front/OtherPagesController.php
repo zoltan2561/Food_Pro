@@ -14,10 +14,22 @@ use App\Models\Contact;
 use App\Models\Time;
 use App\Models\Ratting;
 use App\Models\Subscribe;
+use App\Models\Item;
 use Illuminate\Http\Request;
 
 class OtherPagesController extends Controller
 {
+    public function allergens()
+    {
+        $items = Item::where('item_status', 1)
+            ->whereNotNull('item_allergens')
+            ->where('item_allergens', '!=', '')
+            ->orderBy('item_name')
+            ->get(['slug', 'item_name', 'item_allergens']);
+
+        return view('web.allergens', compact('items'));
+    }
+
     public function faq(Request $request)
     {
         $getfaqs = Faq::select("id", "title", "description")->orderBydesc('id')->get();

@@ -109,6 +109,7 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 	Route::get('/search', [WebItemController::class, 'search'])->name('search');
 	Route::get('/view-all', [WebItemController::class, 'viewall'])->name('viewall');
 	Route::get('/get-item-allergens', [WebItemController::class, 'getitemallergens'])->name('get_item_allergens');
+	Route::get('/alergens.html', [WebOtherPagesController::class, 'allergens'])->name('allergens');
 	// otherpages
 	Route::get('/abous-us', [WebOtherPagesController::class, 'aboutus'])->name('about-us');
 	Route::get('/privacy-policy', [WebOtherPagesController::class, 'privacypolicy'])->name('privacy-policy');

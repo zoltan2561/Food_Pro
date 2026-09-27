@@ -436,8 +436,8 @@
                                         <span class="fw-600">{{ trans('labels.allergens') }}:</span>
                                     </a>
                                     <span class="text-muted">{{ $displayAllergens }}</span>
-                                    <a href="{{ url('alergens.html') }}" class="ms-2 text-decoration-underline small">
-                                        {{ __('allergén táblázat') }}
+                                    <a href="{{ route('allergens') }}" class="ms-2 text-decoration-underline small">
+                                        {{ trans('labels.allergen_table') }}
                                     </a>
                                 </div>
                             @endif

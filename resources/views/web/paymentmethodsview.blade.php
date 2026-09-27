@@ -52,7 +52,7 @@
                        data-payment-type="{{ $pt }}"
                        value="{{ $pt }}"
                        data-currency="{{ $pmdata->currency }}"
-                       @if($disabled) disabled title="Bejelentkezés szükséges" @endif>
+                       @if($disabled) disabled title="{{ trans('labels.login_required') }}" @endif>
                 <div class="payment-gateway mb-0 justify-content-between">
                     <span>
                         <i class="fa-solid {{ $isWallet ? 'fa-wallet' : 'fa-credit-card' }} payment-icon" aria-hidden="true"></i>
@@ -65,7 +65,7 @@
                                     {{ helper::currency_format(Auth::user()->wallet ?? 0) }}
                                 </span>
                             @else
-                                <span class="small text-danger">Bejelentkezés szükséges</span>
+                                <span class="small text-danger">{{ trans('labels.login_required') }}</span>
                             @endauth
                         @endif
                         <span class="check-icon"></span>
@@ -99,6 +99,5 @@
         <input type="hidden" name="stripekey" id="stripekey" value="">
     @endif
 </div>
-
 
 

@@ -98,7 +98,7 @@
                                                         @if (env('Environment') == 'sendbox') onclick="myFunction()" @else href="{{ URL::to('login/google') }}" @endif>
                                                         <img src="{{ helper::web_image_path('google.svg') }}"
                                                             alt="social-icon" class="brands-logo"><span
-                                                            class="text-dark px-1">Sign in</span>
+                                                            class="text-dark px-1">{{ trans('labels.sign_in') }}</span>
                                                     </a>
                                                 </div>
                                             @endif
@@ -110,7 +110,7 @@
                                                         @if (env('Environment') == 'sendbox') onclick="myFunction()" @else href="{{ URL::to('login/facebook') }}" @endif>
                                                         <img src="{{ helper::web_image_path('facebook.svg') }}"
                                                             alt="social-icon" class="brands-logo"><span
-                                                            class="text-dark px-1">Sign in</span>
+                                                            class="text-dark px-1">{{ trans('labels.sign_in') }}</span>
                                                     </a>
                                                 </div>
                                             @endif

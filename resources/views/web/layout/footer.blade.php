@@ -52,8 +52,8 @@
                                     <li><a href="{{ route('terms-conditions') }}"
                                             class="text-white">{{ trans('labels.terms_condition') }}</a></li>
                                     <li>
-                                        <a href="alergens.html" class="text-white">
-                                            Allergén táblázat
+                                        <a href="{{ route('allergens') }}" class="text-white">
+                                            {{ trans('labels.allergen_table') }}
                                         </a>
                                     </li>
                                 </ul>
@@ -108,7 +108,7 @@
                             </div>
                         </div>
                         @if (\App\Models\Payment::where('payment_type', 16)->where('is_activate', 1)->where('is_available', 1)->exists())
-                            <span class="badge text-bg-light mt-2">Barion tesztfizetés</span>
+                            <span class="badge text-bg-light mt-2">{{ trans('labels.sandbox_payment') }}</span>
                         @endif
                     </div>
                 </div>

@@ -60,7 +60,7 @@
                                         {{-- Infó, ha a kiszállítás tiltva van --}}
                                         @if(!$deliveryOn)
                                             <div class="alert alert-info mb-3">
-                                                🚚 <strong>Kiszállítás átmenetileg nem elérhető</strong>
+                                                🚚 <strong>{{ trans('labels.delivery_paused') }}</strong>
                                             </div>
                                         @endif
 
@@ -197,7 +197,7 @@
                                         @if (Auth::user() && Auth::user()->type == 2)
                                             <div class="col-md-9 col-sm-8">
                                                 @if ($getaddresses->count() > 0)
-                                                    <label class="form-label">Mentett cím kiválasztása</label>
+                                                    <label class="form-label">{{ trans('labels.select_saved_address') }}</label>
                                                     <select name="address_type" id="address_type" class="form-select">
                                                         @foreach ($getaddresses as $address)
                                                             <option value="{{ $address->id }}" {{ $address->is_default == 1 ? 'selected' : '' }}>
@@ -209,7 +209,7 @@
                                             </div>
                                             <div class="col-md-3 col-sm-4 py-sm-4">
                                                 <a href="{{ URL::to('/address') }}" type="button" class="btn btn-address mt-sm-2 w-100">
-                                                    <i class="fa-solid fa-plus mx-1"></i> Új cím hozzáadása
+                                                    <i class="fa-solid fa-plus mx-1"></i> {{ trans('labels.add_new_address') }}
                                                 </a>
                                             </div>
                                         @endif
@@ -217,7 +217,7 @@
                                         {{-- Lakcím --}}
                                         <div class="col-12">
                                             <label for="new_address" class="form-label">{{ trans('labels.address') }} <span class="text-danger">*</span></label>
-                                             <textarea name="address" id="new_address" class="form-control" rows="2" placeholder="Utca, házszám, emelet, ajtó" required>{{ old('address') }}</textarea>
+                                             <textarea name="address" id="new_address" class="form-control" rows="2" placeholder="{{ trans('labels.address_details_placeholder') }}" required>{{ old('address') }}</textarea>
                                         </div>
                                              {{-- The zone name can cover several towns, so the buyer enters the city. --}}
                                             <div class="col-md-6">
@@ -228,7 +228,7 @@
                                                        class="form-control"
                                                        name="city"
                                                        id="new_city"
-                                                       placeholder="Pl. Vásárosnamény"
+                                                       placeholder="{{ trans('labels.city_placeholder') }}"
                                                        value="{{ old('city') }}"
                                                        required
                                                        autocomplete="address-level2">
@@ -312,8 +312,8 @@
                                     <div class="form-check">
                                         <input type="checkbox" name="terms" id="terms" value="1" class="form-check-input me-2">
                                         <label for="terms" class="form-check-label">
-                                            Elfogadom az <a href="{{ route('terms-conditions') }}" target="_blank" rel="noopener noreferrer">ÁSZF-et</a>
-                                            és az <a href="{{ route('privacy-policy') }}" target="_blank" rel="noopener noreferrer">Adatvédelmi Tájékoztatót</a>.
+                                            {{ trans('labels.checkout_consent_start') }} <a href="{{ route('terms-conditions') }}" target="_blank" rel="noopener noreferrer">{{ trans('labels.checkout_terms_link') }}</a>
+                                            {{ trans('labels.checkout_consent_and') }} <a href="{{ route('privacy-policy') }}" target="_blank" rel="noopener noreferrer">{{ trans('labels.checkout_privacy_link') }}</a>.
                                         </label>
                                     </div>
                                 </div>

@@ -36,7 +36,7 @@
                 {{-- for large devices - for header bar --}}
                 <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
                     data-bs-target="#foodProNavigation" aria-controls="foodProNavigation"
-                    aria-expanded="false" aria-label="Menü megnyitása">
+                    aria-expanded="false" aria-label="{{ trans('labels.open_menu') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse" id="foodProNavigation">
