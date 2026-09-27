@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Food Pro</title>
+  <rect width="64" height="64" rx="16" fill="#176b5b"/>
+  <circle cx="32" cy="33" r="20" fill="none" stroke="#fff8eb" stroke-width="4"/>
+  <path d="M32 15v14m-7-13v12m14-12v12M25 28c0 6 14 6 14 0m-7 0v20" fill="none" stroke="#fff8eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+</svg>

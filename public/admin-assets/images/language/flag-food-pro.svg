@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Nyelv">
+  <circle cx="24" cy="24" r="20" fill="#e6f4ea" stroke="#176b5b" stroke-width="3"/>
+  <path d="M4 24h40M24 4c-8 8-8 32 0 40M24 4c8 8 8 32 0 40" fill="none" stroke="#176b5b" stroke-width="2.5"/>
+</svg>

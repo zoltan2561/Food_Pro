@@ -1,0 +1,10 @@
+/* Shared styles for the legacy authentication and error templates. */
+body { min-height: 100vh; margin: 0; color: #21372f; background: #f4f8f3; font-family: Inter, "Segoe UI", system-ui, sans-serif; }
+.h-100vh { min-height: 100vh; }
+.login-admin .bg-black { background: #173d35 !important; }
+.login-admin .login-right-content { min-height: 100vh; padding: clamp(28px, 6vw, 72px); justify-content: center; }
+.login-admin .img-logo img { max-width: 200px; max-height: 90px; object-fit: contain; }
+.login-admin .form-control { min-height: 44px; margin-bottom: 14px; }
+.login-admin .btn-primary, .btn-primary { background: #176b5b; border-color: #176b5b; }
+.login-admin .btn-primary:hover, .btn-primary:hover { background: #115446; border-color: #115446; }
+.language-width { width: 26px; height: 26px; object-fit: cover; }
