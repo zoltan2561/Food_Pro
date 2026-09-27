@@ -5,7 +5,7 @@
             <div class="row justify-content-center text-center">
                 <div class="col-12">
                     <div class="success-image">
-                        <img src="{{ asset('foodpro-assets/order-success.svg') }}" alt="Rendelés sikeres" width="210" height="175">
+                        <img src="{{ helper::image_path(helper::appdata()->image ?: 'order-success.svg') }}" alt="{{ trans('labels.order_placed') }}" width="210" height="175">
                     </div>
                     <div class="">
                         <h4 class="fw-600 mb-3">{{ trans('labels.order_placed') }}</h4>

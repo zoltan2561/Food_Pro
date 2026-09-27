@@ -41,12 +41,6 @@
             @include('admin.theme.sidebar')
             <div class="{{ session()->get('direction') == 2 ? 'main-content-rtl' : 'main-content' }}">
                 <div class="page-content">
-                    @if (helper::check_alert() == 0)
-                        <div class="alert alert-danger text-center">
-                            <a href="{{ URL::to('admin/settings') }}" class="text-dark"> <i class="fa fa-cog"></i>
-                                {{ trans('messages.settings_note') }}</a>
-                        </div>
-                    @endif
                     @yield('content')
                 </div>
             </div>

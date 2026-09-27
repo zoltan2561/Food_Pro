@@ -37,14 +37,15 @@ class CheckoutController extends Controller
         if (session()->get('order_type') == 2) {
             session()->forget('addressdata');
         }
+        $buynow = $request->boolean('buynow') ? 1 : 0;
         $getsettings = Settings::first();
         if (Auth::user() && Auth::user()->type == 2) {
             $getaddresses = Address::select('id', 'user_id', 'address_type', 'address', 'landmark', 'postal_code', 'is_default', 'title')->where('user_id', Auth::user()->id)->orderbyDesc('id')->get();
-            $getcartlist = Cart::where('user_id', Auth::user()->id)->where('buynow', $request->buynow)->orderByDesc('id')->get();
+            $getcartlist = Cart::where('user_id', Auth::user()->id)->where('buynow', $buynow)->orderByDesc('id')->get();
             $getpaymentmethods = Payment::select('id', 'unique_identifier', 'environment', 'payment_name', 'payment_type', 'currency', 'public_key', 'secret_key', 'encryption_key', 'image')->whereIn('payment_type', [1, 2, 16])->where('is_available', 1)->orderBy('reorder_id')->where('is_activate', '1')->get();
         } else {
             $getaddresses = array();
-            $getcartlist = Cart::where('session_id', Session::getId())->where('buynow', $request->buynow)->orderByDesc('id')->get();
+            $getcartlist = Cart::where('session_id', Session::getId())->where('buynow', $buynow)->orderByDesc('id')->get();
             $getpaymentmethods = Payment::select('id', 'unique_identifier', 'environment', 'payment_name', 'payment_type', 'currency', 'public_key', 'secret_key', 'encryption_key', 'image')->whereIn('payment_type', [1, 16])->where('is_available', 1)->orderBy('reorder_id')->where('is_activate', '1')->get();
         }
         $producttax = 0;

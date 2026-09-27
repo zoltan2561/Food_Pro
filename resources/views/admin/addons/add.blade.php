@@ -40,14 +40,14 @@
                                             <div class="d-flex">
                                                 <div class="form-check-inline">
                                                     <input class="form-check-input get_price" type="radio" name="type"
-                                                        value="1" id="free" checked required>
+                                                        value="1" id="free" {{ old('type', 1) == 1 ? 'checked' : '' }} required onchange="document.getElementById('price').required = false; document.getElementById('price_row').style.display = 'none'">
                                                     <label class="form-check-label"
                                                         for="free">{{ trans('labels.free') }}</label>
                                                 </div>
                                                 <div class="form-check-inline">
                                                     <input class="form-check-input get_price" type="radio" name="type"
                                                         value="2" id="paid"
-                                                        {{ old('type') == 2 ? 'checked' : '' }} required>
+                                                        {{ old('type') == 2 ? 'checked' : '' }} required onchange="document.getElementById('price').required = true; document.getElementById('price_row').style.display = 'block'">
                                                     <label class="form-check-label text-nowrap"
                                                         for="paid">{{ trans('labels.paid') }}</label>
                                                 </div>
@@ -55,12 +55,12 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="form-group" id="price_row">
+                                        <div class="form-group" id="price_row" style="{{ old('type', 1) == 1 ? 'display:none' : '' }}">
                                             <label class="col-form-label" for="price">{{ trans('labels.price') }} <span
                                                     class="text-danger">*</span> </label>
                                             <input type="text" class="form-control" name="price" id="price"
                                                 placeholder="{{ trans('labels.price') }}" value="{{ old('price') }}"
-                                                required>
+                                                {{ old('type') == 2 ? 'required' : '' }}>
                                         </div>
                                     </div>
                                 </div>

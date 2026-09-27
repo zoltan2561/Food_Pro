@@ -261,7 +261,7 @@
                             <div class="form-group col-lg-12">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="review-modal-img">
-                                        <img src="{{ asset('foodpro-assets/foodpro-grill.png') }}" class="h-100 w-100 object-fit-cover rounded-4 border" alt="" />
+                                        <img src="{{ helper::image_path(helper::appdata()->no_data_image) }}" class="h-100 w-100 object-fit-cover rounded-4 border" alt="" />
                                     </div>
                                     <p class="fw-600 mb-0" id="data-item-name"></p>
                                 </div>

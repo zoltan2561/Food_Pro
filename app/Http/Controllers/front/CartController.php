@@ -100,8 +100,12 @@ class CartController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Érvénytelen feltét vagy extra.'], 422);
             }
             foreach ($groups as $group) {
+                if (!Addons::where('addongroup_id', $group->id)->where('is_deleted', 2)->where('is_available', 1)->exists()) {
+                    continue;
+                }
                 $selected = $addons->where('addongroup_id', $group->id)->count();
-                $minimum = (int) $group->selection_type === 1 ? max(1, (int) $group->min_count) : 0;
+                $minimum = (int) $group->selection_type === 1
+                    ? ((int) $group->selection_count === 1 ? 1 : max(1, (int) $group->min_count)) : 0;
                 $maximum = (int) $group->selection_count === 1 ? 1 : max(1, (int) $group->max_count);
                 if ($selected < $minimum || $selected > $maximum) {
                     return response()->json(['status' => 0, 'message' => 'A feltétek kiválasztása hiányos.'], 422);

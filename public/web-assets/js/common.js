@@ -32,6 +32,8 @@
         const input = document.getElementById('item_qty_' + slug);
         if (!input) return;
         input.value = Math.max(1, Math.min(99, Number(input.value || 1) + (direction === 'plus' ? 1 : -1)));
+        const item = [...document.querySelectorAll('[id^="slug_"]')].find(node => node.value === slug);
+        if (item) window.getaddons(item.id.slice(5));
     };
 
     window.getaddons = function (id) {
@@ -39,7 +41,12 @@
         const base = Number(value('item_price_' + id)) || 0;
         const extra = [...document.querySelectorAll('.addons_chk_' + id + ':checked, .extras_chk_' + id + ':checked')]
             .reduce((sum, input) => sum + Number(input.dataset.addonsPrice || input.dataset.extrasPrice || 0), 0);
-        if (item && typeof window.currency_format === 'function') item.textContent = currency_format(base + extra);
+        if (typeof window.currency_format !== 'function') return;
+        if (item) item.textContent = currency_format(base + extra);
+        const slug = value('slug_' + id);
+        const qty = Math.max(1, Number(value('item_qty_' + slug)) || 1);
+        document.querySelectorAll('.foodpro-selection-total[data-item-id="' + id + '"]')
+            .forEach(node => { node.textContent = currency_format((base + extra) * qty); });
     };
 
     window.addtocart = async function (url, id, buynow) {
@@ -48,10 +55,11 @@
         let rules = [];
         try { rules = JSON.parse(groups?.dataset.addongroup_val || '[]'); } catch (_) { /* no groups */ }
         for (const group of rules) {
-            const selected = document.querySelectorAll('[name="addons_id_' + group.id + '_' + id + '"]:checked');
+            if (!document.getElementById('item_addons_group_' + id + '_' + group.id)) continue;
+            const selected = document.querySelectorAll('[name="addons_id_' + group.id + '_' + id + '"]:checked:not([value=""])');
             const required = Number(group.selection_type) === 1;
-            const minimum = required ? Math.max(1, Number(group.min_count) || 1) : 0;
-            const maximum = Number(group.max_count) || 99;
+            const minimum = required ? (Number(group.selection_count) === 1 ? 1 : Math.max(1, Number(group.min_count) || 1)) : 0;
+            const maximum = Number(group.selection_count) === 1 ? 1 : Math.max(1, Number(group.max_count) || 1);
             if (selected.length < minimum || selected.length > maximum) {
                 notice('Válassz megfelelő számú feltétet: ' + group.name);
                 return;

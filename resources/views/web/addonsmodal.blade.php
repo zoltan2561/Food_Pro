@@ -79,10 +79,19 @@
                                 </span>
                             @endif
                         </div>
+                        @if ($addons_group->selection_type == 2 && $addons_group->selection_count == 1)
+                            <div class="form-check foodpro-choice">
+                                <input class="form-check-input addons_chk_{{ $itemdata['id'] }}" type="radio" value=""
+                                    name="addons_id_{{ $addons_group->id }}_{{ $itemdata['id'] }}"
+                                    id="addons_none_{{ $addons_group->id }}_{{ $itemdata['id'] }}" checked
+                                    onclick="getaddons('{{ $itemdata['id'] }}')">
+                                <label class="form-check-label" for="addons_none_{{ $addons_group->id }}_{{ $itemdata['id'] }}">{{ trans('labels.no_topping') }}</label>
+                            </div>
+                        @endif
                         @foreach ($itemdata['addons'] as $addons)
                             @if ($addons->addongroup_id == $addons_group->id)
                                 <div
-                                    class="{{ session()->get('direction') == '2' ? 'd-flex gap-2 me-2' : 'form-check' }}">
+                                    class="form-check foodpro-choice">
                                     @php
                                         if ($addons_group->selection_count == 1) {
                                             $type = 'radio';
@@ -141,11 +150,12 @@
                 <div class="item-addons-list mt-3 border-bottom pb-3">
                     <h5 class="mb-1 fs-6">{{ trans('labels.extras') }}</h5>
                     @foreach ($itemdata['extras'] as $extras)
-                        <div class="{{ session()->get('direction') == '2' ? 'd-flex gap-2 me-2' : 'form-check' }}">
+                        <div class="form-check foodpro-choice">
                             <input
                                 class="form-check-input cursor-pointer extras_chk_{{ $itemdata['id'] }} {{ session()->get('direction') == '2' ? 'ms-0' : '' }}"
                                 type="checkbox" value="{{ $extras->id }}" data-extras-id="{{ $extras->id }}"
                                 data-extras-price="{{ $extras->price }}" data-extras-name="{{ $extras->name }}"
+                                onchange="getaddons('{{ $itemdata['id'] }}')"
                                 id="extras_{{ $extras->id }}_{{ $itemdata['id'] }}"
                                 name="extras_id_{{ $itemdata['id'] }}">
                             <div class="d-flex justify-content-between w-100 ">
@@ -182,6 +192,10 @@
 </div>
 </div>
 <div class="modal-footer d-block py-0 item-details border-0">
+    <div class="foodpro-selection-summary d-flex justify-content-between align-items-center mt-3">
+        <span>{{ trans('labels.total') }}</span>
+        <strong class="foodpro-selection-total" data-item-id="{{ $itemdata['id'] }}">{{ helper::currency_format($price) }}</strong>
+    </div>
     <div class="w-100 m-0 py-2 border-bottom border-top">
         <div class="row align-items-center justify-content-between g-2">
             <div class="col-sm-2">

@@ -5,7 +5,7 @@
     </div>
     
     <div class="alert top-alert" role="alert">
-        <p>Dont Use Double Qoute (")</p>
+        <p>A felületi szövegek itt szerkeszthetők. Idézőjelek is használhatók.</p>
     </div>
     
     <div class="row settings">
@@ -59,6 +59,10 @@
                     <button class="nav-link bg-white" id="message-tab" data-bs-toggle="tab" data-bs-target="#message" type="button"
                         role="tab" aria-controls="message" aria-selected="false">Messages</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link bg-white" id="checkout-tab" data-bs-toggle="tab" data-bs-target="#checkout" type="button"
+                        role="tab" aria-controls="checkout" aria-selected="false">Pénztár szövegei</button>
+                </li>
             </ul>
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="labels" role="tabpanel" aria-labelledby="labels-tab">
@@ -69,15 +73,19 @@
                                 <input type="hidden" class="form-control" name="currantLang"
                                     value="{{ $currantLang->code }}">
                                 <input type="hidden" class="form-control" name="file" value="label">
+                                <div class="mb-3">
+                                    <label for="label-search" class="form-label">Felületi szöveg keresése</label>
+                                    <input id="label-search" type="search" class="form-control" data-translation-search
+                                        placeholder="Például: menü, kosár, lábléc">
+                                </div>
                                 <div class="row">
                                     @foreach ($arrLabel as $label => $value)
-                                        <div class="col-md-6">
+                                        <div class="col-md-6" data-translation-row>
                                             <div class="form-group">
                                                 <label class="form-label" for="example3cols1Input">{{ $label }}
                                                 </label>
                                                 <input type="text" class="form-control"
                                                     name="label[{{ $label }}]" id="label{{ $label }}"
-                                                    onkeyup="validation($(this).val(),this.getAttribute('id'))"
                                                     value="{{ $value }}">
                                             </div>
                                         </div>
@@ -102,6 +110,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="tab-pane fade" id="checkout" role="tabpanel" aria-labelledby="checkout-tab">
+                    <div class="card border-0 box-shadow">
+                        <div class="card-body">
+                            <form method="post" action="{{ URL::to('admin/language-settings/update') }}">
+                                @csrf
+                                <input type="hidden" name="currantLang" value="{{ $currantLang->code }}">
+                                <input type="hidden" name="file" value="checkout">
+                                <div class="row">
+                                    @foreach ($arrCheckout as $key => $value)
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="checkout_{{ $key }}">{{ $key }}</label>
+                                            <input class="form-control" id="checkout_{{ $key }}" name="checkout[{{ $key }}]"
+                                                value="{{ $value }}" type="text">
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button type="submit" class="btn btn-primary">{{ trans('labels.save') }}</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <div class="tab-pane fade" id="message" role="tabpanel" aria-labelledby="message-tab">
                     <div class="card border-0 box-shadow">
                         <div class="card-body">
@@ -110,15 +139,19 @@
                                 <input type="hidden" class="form-control" name="currantLang"
                                     value="{{ $currantLang->code }}">
                                 <input type="hidden" class="form-control" name="file" value="message">
+                                <div class="mb-3">
+                                    <label for="message-search" class="form-label">Üzenet keresése</label>
+                                    <input id="message-search" type="search" class="form-control" data-translation-search
+                                        placeholder="Például: rendelés, hiba">
+                                </div>
                                 <div class="row">
                                     @foreach ($arrMessage as $label => $value)
-                                        <div class="col-md-6">
+                                        <div class="col-md-6" data-translation-row>
                                             <div class="form-group">
                                                 <label class="form-label" for="example3cols1Input">{{ $label }}
                                                 </label>
                                                 <input type="text" class="form-control"
                                                     name="message[{{ $label }}]" id="message{{ $label }}"
-                                                    onkeyup="validation($(this).val(),this.getAttribute('id'))"
                                                     value="{{ $value }}">
                                             </div>
                                         </div>
@@ -151,12 +184,14 @@
 
 @section('script')
     <script>
-        function validation(value, id) {
-            if (value.includes('"')) {
-                newval = value.replaceAll('"', '');
-                $('#' + id).val(newval);
-            }
-        }
+        document.querySelectorAll('[data-translation-search]').forEach(function (search) {
+            search.addEventListener('input', function () {
+                var query = search.value.toLocaleLowerCase().trim();
+                search.closest('.tab-pane').querySelectorAll('[data-translation-row]').forEach(function (row) {
+                    var input = row.querySelector('input');
+                    row.hidden = !(row.textContent + ' ' + (input ? input.value : '')).toLocaleLowerCase().includes(query);
+                });
+            });
+        });
     </script>
-    
 @endsection

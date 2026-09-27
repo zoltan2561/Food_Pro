@@ -26,7 +26,7 @@
                                 @endif
                                 @if ($sliderdata['item_info'] == '' && $sliderdata['category_info'] == '')
                                     <a href="{{ route('menu') }}" class="btn btn-primary fw-500 px-4 py-2 animate__animated animate__fadeInUp">
-                                        Étlap megtekintése <i class="fa-solid fa-circle-arrow-right"></i>
+                                        {{ trans('labels.menu_cta') }} <i class="fa-solid fa-circle-arrow-right"></i>
                                     </a>
                                 @endif
                             </div>

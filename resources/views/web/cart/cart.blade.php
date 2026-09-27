@@ -182,7 +182,6 @@
                 e.stopPropagation();
 
                 var id    = btn.getAttribute('data-id');
-                var rowSel= btn.getAttribute('data-row') || ('#row-' + id);
                 var url   = btn.getAttribute('data-url') || '{{ url('/cart/deleteitem') }}';
                 var token = getCsrf();
 
@@ -204,14 +203,7 @@
                         catch (_) { out = null; }
 
                         if (res.ok && ((out && Number(out.status) === 1) || out === 1 || out === '1')) {
-                            var row = document.querySelector(rowSel) || btn.closest('[data-cart-row]');
-                            if (row) row.remove();
-
-                            // opcionális: ha van számláló elem az oldalon
-                            var counter = document.querySelector('.js-cart-count');
-                            if (counter && out && typeof out.data !== 'undefined') {
-                                counter.textContent = out.data;
-                            }
+                            window.location.reload();
                         } else {
                             alert((out && out.message) ? out.message : 'Hiba a törlésnél.');
                         }

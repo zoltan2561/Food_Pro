@@ -184,10 +184,19 @@
                                                                 </span>
                                                             @endif
                                                         </div>
+                                                        @if ($addons_group->selection_type == 2 && $addons_group->selection_count == 1)
+                                                            <div class="form-check foodpro-choice">
+                                                                <input class="form-check-input addons_chk_{{ $getitemdata['id'] }}" type="radio" value=""
+                                                                    name="addons_id_{{ $addons_group->id }}_{{ $getitemdata['id'] }}"
+                                                                    id="addons_none_{{ $addons_group->id }}_{{ $getitemdata['id'] }}" checked
+                                                                    onclick="getaddons('{{ $getitemdata['id'] }}')">
+                                                                <label class="form-check-label" for="addons_none_{{ $addons_group->id }}_{{ $getitemdata['id'] }}">{{ trans('labels.no_topping') }}</label>
+                                                            </div>
+                                                        @endif
                                                         @foreach ($getitemdata['addons'] as $addons)
                                                             @if ($addons->addongroup_id == $addons_group->id)
                                                                 <div
-                                                                    class="mx-2 {{ session()->get('direction') == '2' ? 'd-flex gap-2' : 'form-check' }}">
+                                                                    class="form-check foodpro-choice">
                                                                     @php
                                                                         if ($addons_group->selection_count == 1) {
                                                                             $type = 'radio';
@@ -234,14 +243,14 @@
                                     <h5 class="mb-1 fs-6">{{ trans('labels.extras') }}</h5>
                                     <div class="item-addons-list mt-2 border-bottom pb-3 px-2">
                                         @foreach ($getitemdata->extras as $extras)
-                                            <div
-                                                class="{{ session()->get('direction') == '2' ? 'd-flex' : 'form-check' }}">
+                                                <div class="form-check foodpro-choice">
                                                 <input
                                                     class="form-check-input cursor-pointer extras_chk_{{ $getitemdata['id'] }} {{ session()->get('direction') == '2' ? 'ms-0' : '' }}"
                                                     type="checkbox" value="{{ $extras->id }}"
                                                     data-extras-id="{{ $extras->id }}"
                                                     data-extras-price="{{ $extras->price }}"
                                                     data-extras-name="{{ $extras->name }}"
+                                                    onchange="getaddons('{{ $getitemdata['id'] }}')"
                                                     id="extras_{{ $extras->id }}_{{ $getitemdata['id'] }}"
                                                     name="extras_id_{{ $getitemdata['id'] }}">
                                                 <div
@@ -280,6 +289,10 @@
                                 value="{{ Auth::user() && Auth::user()->type == 2 }}">
                             <input type="hidden" name="customer_login" id="customer_login_{{ $getitemdata['slug'] }}"
                                 value="{{ App\Models\SystemAddons::where('unique_identifier', 'customer_login')->first() }}">
+                            <div class="foodpro-selection-summary d-flex justify-content-between align-items-center mt-3">
+                                <span>{{ trans('labels.total') }}</span>
+                                <strong class="foodpro-selection-total" data-item-id="{{ $getitemdata['id'] }}">{{ helper::currency_format($price) }}</strong>
+                            </div>
                             <div class="border-bottom border-top py-3">
                                 <div class="row g-3 align-items-center">
                                     <div class="col-md-auto col-12">

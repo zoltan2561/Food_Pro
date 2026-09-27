@@ -379,6 +379,21 @@
                             <!-- payment-summary -->
                             <div class="summary py-3 mb-4">
                                 <h2 class="border-bottom">{{ trans('labels.payment_summary') }}</h2>
+                                <div class="checkout-items" aria-label="{{ trans('labels.items') }}">
+                                    @foreach ($getcartlist as $cartitem)
+                                        <div class="checkout-item">
+                                            <img src="{{ helper::image_path($cartitem->item_image) }}" alt="" width="58" height="58">
+                                            <div class="checkout-item-info">
+                                                <strong>{{ $cartitem->item_name }}</strong>
+                                                <small>{{ $cartitem->qty }} × {{ helper::currency_format($cartitem->item_price + $cartitem->addons_total_price + $cartitem->extras_total_price) }}</small>
+                                                @if ($cartitem->addons_name || $cartitem->extras_name)
+                                                    <small>{{ str_replace('| ', ', ', trim($cartitem->addons_name . ', ' . $cartitem->extras_name, ', ')) }}</small>
+                                                @endif
+                                            </div>
+                                            <strong class="checkout-item-total">{{ helper::currency_format(($cartitem->item_price + $cartitem->addons_total_price + $cartitem->extras_total_price) * $cartitem->qty) }}</strong>
+                                        </div>
+                                    @endforeach
+                                </div>
                                 <div class="bill-details border-bottom pb-2">
                                     <div class="row justify-content-between align-items-center">
                                         <div class="col-auto"><span>{{ trans('labels.subtotal') }}</span></div>

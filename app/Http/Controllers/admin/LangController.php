@@ -39,9 +39,9 @@ class LangController extends Controller
         $arrLabel   = json_decode(file_get_contents($dir .'/'.'labels.json'));
 
         $arrMessage   = json_decode(file_get_contents($dir .'/'.'messages.json'));
+        $arrCheckout = is_file($dir . '/checkout.php') ? require $dir . '/checkout.php' : [];
 
-
-        return view('admin.language.index',compact('getlanguages','currantLang','arrLabel','arrMessage'));
+        return view('admin.language.index',compact('getlanguages','currantLang','arrLabel','arrMessage','arrCheckout'));
     }
 
     public function language(Request $request)
@@ -66,65 +66,43 @@ class LangController extends Controller
         $arrLabel   = json_decode(file_get_contents($dir .'/'.'labels.json'));
 
         $arrMessage   = json_decode(file_get_contents($dir .'/'.'messages.json'));
+        $arrCheckout = is_file($dir . '/checkout.php') ? require $dir . '/checkout.php' : [];
 
-
-        return view('admin.language.index',compact('getlanguages','currantLang','arrLabel','arrMessage'));
+        return view('admin.language.index',compact('getlanguages','currantLang','arrLabel','arrMessage','arrCheckout'));
     }
 
     public function storeLanguageData(Request $request)
     {
-        
-        $langFolder = base_path() . '/resources/lang/' . $request->currantLang;
+        $data = $request->validate([
+            'currantLang' => 'required|string|max:12',
+            'file' => 'required|in:label,message,checkout',
+            'label' => 'required_if:file,label|array',
+            'message' => 'required_if:file,message|array',
+            'checkout' => 'required_if:file,checkout|array',
+        ]);
+        abort_unless(Languages::where('code', $data['currantLang'])->exists(), 404);
 
-        if(!is_dir($langFolder))
-        {
-            mkdir($langFolder);
-            chmod($langFolder, 0777);
-        }
-
-        if(isset($request->file) == "label") {
-            if(isset($request->label) && !empty($request->label))
-            {
-
-                $content = "<?php return [";
-                $contentjson = "{";
-                foreach($request->label as $key => $data)
-                {
-                    $content .= '"'.$key.'" => "'.str_replace('\\', '', addslashes($data)).'",';
-                    $contentjson .= '"'.$key.'":"'.$data.'",';
-                }
-                $content .= "];";
-                $contentjson .= "}";
-                
-                file_put_contents($langFolder . "/labels.php", $content);
-                file_put_contents($langFolder . "/labels.json", str_replace(",}","}",$contentjson));
+        $base = $data['file'] === 'label' ? 'labels' : ($data['file'] === 'message' ? 'messages' : 'checkout');
+        $directory = base_path('resources/lang/' . $data['currantLang']);
+        abort_unless(is_dir($directory), 404);
+        $phpPath = $directory . '/' . $base . '.php';
+        $jsonPath = $directory . '/' . $base . '.json';
+        $existing = $base === 'checkout'
+            ? require $phpPath
+            : json_decode(file_get_contents($jsonPath), true, 512, JSON_THROW_ON_ERROR);
+        $submitted = $data[$data['file']];
+        foreach ($existing as $key => $value) {
+            if (array_key_exists($key, $submitted) && (is_string($submitted[$key]) || is_null($submitted[$key]))) {
+                $existing[$key] = (string) $submitted[$key];
             }
         }
 
-        if(isset($request->file) == "message") {
-            if(isset($request->message) && !empty($request->message))
-            {
-
-                $content = "<?php return [";
-                $contentjson = "{";
-                foreach($request->message as $key => $data)
-                {
-                    $content .= '"'.$key.'" => "'.str_replace('\\', '', addslashes($data)).'",';
-                    $contentjson .= '"'.$key.'":"'.$data.'",';
-                }
-                $content .= "];";
-                $contentjson .= "}";
-                
-                file_put_contents($langFolder . "/messages.php", $content);
-                file_put_contents($langFolder . "/messages.json", str_replace(",}","}",$contentjson));
-            }
+        file_put_contents($phpPath, "<?php\n\nreturn " . var_export($existing, true) . ";\n", LOCK_EX);
+        if ($base !== 'checkout') {
+            file_put_contents($jsonPath, json_encode($existing, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n", LOCK_EX);
         }
-
-       
-        
-        return redirect()->back()->with('success',trans('messages.success'));
+        return redirect()->back()->with('success', trans('messages.success'));
     }
-
     public function layout(Request $request)
     {
         $language = Languages::find($request->id);

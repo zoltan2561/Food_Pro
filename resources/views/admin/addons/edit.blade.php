@@ -43,14 +43,14 @@
                                                 <div class="form-check-inline">
                                                     <input type="radio" name="type" value="1"
                                                         class="form-check-input get_price" id="free" required
-                                                        {{ $addonsdata->price <= 0 ? 'checked' : '' }}>
+                                                        {{ $addonsdata->price <= 0 ? 'checked' : '' }} onchange="document.getElementById('price').required = false; document.getElementById('price_row').style.display = 'none'">
                                                     <label class="form-check-label"
                                                         for="free">{{ trans('labels.free') }}</label>
                                                 </div>
                                                 <div class="form-check-inline">
                                                     <input type="radio" name="type" value="2" id="paid"
                                                         class="form-check-input get_price" required
-                                                        {{ $addonsdata->price > 0 ? 'checked' : '' }}>
+                                                        {{ $addonsdata->price > 0 ? 'checked' : '' }} onchange="document.getElementById('price').required = true; document.getElementById('price_row').style.display = 'block'">
                                                     <label class="form-check-label"
                                                         for="paid">{{ trans('labels.paid') }}</label>
                                                 </div>
@@ -58,12 +58,12 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="form-group @if ($addonsdata->price <= 0) dn @endif" id="price_row">
+                                        <div class="form-group" id="price_row" style="{{ $addonsdata->price <= 0 ? 'display:none' : '' }}">
                                             <label class="col-form-label" for="">{{ trans('labels.price') }} <span
                                                     class="text-danger">*</span> </label>
                                             <input type="text" class="form-control" name="price" id="price"
                                                 placeholder="{{ trans('labels.price') }}" value="{{ $addonsdata->price }}"
-                                                required>
+                                                {{ $addonsdata->price > 0 ? 'required' : '' }}>
                                         </div>
                                     </div>
                                 </div>

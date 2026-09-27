@@ -224,8 +224,10 @@ class UserController extends Controller
                 }
 
                 if (@helper::checkaddons('otp')) {
+                    $guestSessionId = $request->session()->getId();
                     Auth::loginUsingId($checkuser->id, true);
-                    return redirect('/')->with('success', trans('messages.success'));
+                    $hadGuestCart = $this->transferGuestCart($guestSessionId, $checkuser->id);
+                    return redirect($hadGuestCart ? route('cart') : route('home'))->with('success', trans('messages.success'));
                 } else {
                     return redirect(route('login'))->with('success', trans('messages.success'));
                 }
@@ -302,18 +304,14 @@ class UserController extends Controller
                 return redirect(route('login'))->with('error', trans('messages.invalid_user'));
             }
         } else {
+            $guestSessionId = $request->session()->getId();
             if (Auth::attempt($request->only('email', 'password'))) {
                 if (Auth::user()->type == 2) {
                     if (Auth::user()->is_available == 1) {
                         if (Auth::user()->is_verified == 1) {
 
-                            $oldsessionid = session()->get('oldsessionid');
-                            $cart = Cart::where('session_id', $oldsessionid)->update([
-                                'user_id' => Auth::user()->id,
-                                'session_id' => '',
-                            ]);
-
-                            return redirect(route('home'));
+                            $hadGuestCart = $this->transferGuestCart($guestSessionId, Auth::id());
+                            return redirect()->intended($hadGuestCart ? route('cart') : route('home'));
                         } else {
                             $otp = rand(100000, 999999);
                             $verification = helper::verificationemail($request->email, $otp);
@@ -453,5 +451,15 @@ class UserController extends Controller
         Auth::logout();
         session()->flush();
         return redirect(route('home'));
+    }
+
+    private function transferGuestCart(string $sessionId, int $userId): bool
+    {
+        $cart = Cart::where('session_id', $sessionId)->where(function ($query) {
+            $query->whereNull('user_id')->orWhere('user_id', 0);
+        });
+        $hadGuestCart = $cart->exists();
+        $cart->update(['user_id' => $userId, 'session_id' => '']);
+        return $hadGuestCart;
     }
 }

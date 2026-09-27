@@ -24,7 +24,7 @@ Az admin **Megjelenés** menüjében és a Beállításokban négy teljes admin 
 
 A Barion tesztmódra van előkészítve, és vásárlók számára alapból ki van kapcsolva. Az admin **Fizetések** lapján add meg a saját sandbox kereskedői e-mail címet és POSKey-t, majd kapcsold be a módot. A visszatérési és callback cím a lapon látható, a Barion tesztkörnyezetét a rendszer a `secure.test.barion.com` címen használja. A callback teljes kipróbálásához a helyi szerver helyett nyilvánosan elérhető HTTPS cím kell. Az éles Barion fiók és kulcs külön bevezetési feladat.
 
-A pénztár a termékeket, adókat és a kiválasztott kiszállítási díjat a szerveren számolja. A vásárló választhatja a **Most kérem** módot, amelyhez nem kell időpontot megadni, ha az étterem nyitva van, vagy a **Későbbre kérem** módot az adminban tárolt nyitvatartásból képzett szabad idősávval. Az időzítést a szerver ellenőrzi. A vásárlói fiók elérhető, de a pénztár vendégként is használható. A helyi mintarendelések után az adatbázis újra üres állapotba került.
+A pénztár a termékeket, adókat és a kiválasztott kiszállítási díjat a szerveren számolja. A vásárló választhatja a **Most kérem** módot, amelyhez nem kell időpontot megadni, ha az étterem nyitva van, vagy a **Későbbre kérem** módot az adminban tárolt nyitvatartásból képzett szabad idősávval. Az időzítést a szerver ellenőrzi. A vásárlói fiók elérhető, de a pénztár vendégként is használható. A kezdő SQL személyes és rendelési adatok nélkül importálható.
 
 ## Átadás előtti ellenőrzés
 
@@ -34,3 +34,9 @@ A pénztár a termékeket, adókat és a kiválasztott kiszállítási díjat a 
 - A forrás alkalmazás nyilvános GitHub-oldalán nem szerepel külön alkalmazáslicenc. A kereskedelmi továbbértékesítéshez a forráskód és az eredeti képek felhasználási jogát külön tisztázni kell. A Laravel keretrendszer licencnyilatkozata önmagában nem rendezi az alkalmazáskód és a katalógus jogait.
 
 Az új Food Pro hero és termékhelyettesítő képek a `public/foodpro-assets` és `public/admin-assets/images` könyvtárakban vannak. A mintatermékek több esetben közös, általános kategóriaképet használnak; értékesítés előtt tölts fel az adott ételekhez saját fotókat, és ellenőrizd a termékneveket, leírásokat, allergéneket és árakat. A csomagolt frontend könyvtárak licencinformációi a `THIRD_PARTY_NOTICES` könyvtárban találhatók.
+
+## Bemutató és tartalomcsere
+
+A kezdőlapon a **Házi Burger** példán látható a feltétcsoport, az opcionális szósz („Nem kérek feltétet” választással) és a két fizetős extra. A termékoldalon a teljes ár a mennyiséggel együtt azonnal változik. Vendégkosárból történő vásárlói bejelentkezés után a kosár és a választott feltétek megmaradnak. A `food_pro_starter.sql` továbbra sem tartalmaz mintavásárlót vagy mintarendelést; a helyi böngészős próbákhoz létrehozott adatok csak a jelenlegi XAMPP adatbázisban vannak.
+
+Az admin kezdőlapján a **Bemutató tartalom szerkesztése** blokk közvetlenül a megfelelő szerkesztőkhöz vezet. A fő képet és címsort a Sliderek, a kategóriaképeket a Kategóriák, az ételfotókat és leírásokat a Termékek, a feltéteket és áraikat a Feltétcsoportok/Feltétek lapokon lehet módosítani. A logó, színek, lábléc és a sikeres rendelés képe a Beállításokban szerkeszthető. A felület rövid szövegei a Nyelvi beállítások kereshető **Labels** lapján, a pénztár időzítési szövegei a **Pénztár szövegei** lapon módosíthatók. A jogi oldalak és a kiszállítási területek külön admin oldalakkal rendelkeznek.

@@ -2,6 +2,24 @@
 @section('content')
     @include('admin.breadcrumb')
     <div class="container-fluid">
+        @if (Auth::user()->type == 1)
+            <div class="card border-0 box-shadow mb-4">
+                <div class="card-body p-4">
+                    <h4 class="mb-2">Bemutató tartalom szerkesztése</h4>
+                    <p class="text-muted mb-3">Az itt látható étterem mintatartalom. A bemutató előtt cseréld le a szövegeket, képeket, árakat és elérhetőségeket.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/settings') }}">Név, logó, színek, lábléc</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/slider') }}">Fő kép és címsor</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/category') }}">Kategóriák</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/item') }}">Ételek és fotók</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/addongroup') }}">Feltétcsoportok</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/addons') }}">Feltétek</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/language-settings/hu') }}">Felületi szövegek</a>
+                        <a class="btn btn-primary btn-sm" href="{{ url('/') }}" target="_blank" rel="noopener">Weboldal megnyitása</a>
+                    </div>
+                </div>
+            </div>
+        @endif
         @if (Auth::user()->type == 1 || in_array(0, explode(',',helper::get_roles())))
             {{-- @include('admin.plugin') --}}
 

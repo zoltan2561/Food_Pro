@@ -44,7 +44,7 @@ class SettingController extends Controller
             'why_choose_image', 'og_image', 'app_bottom_image', 'mobile_app_image',
             'favicon', 'logo', 'footer_logo', 'faqs_image', 'auth_bg_image',
             'booknow_bg_image', 'refer_earn_bg_image', 'subscribe_newsletter_image',
-            'no_data_image',
+            'no_data_image', 'image',
         ];
         $request->validate(array_fill_keys($imageFields, 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096'));
         $setting = $this->getOrCreateSettings();
@@ -343,6 +343,7 @@ class SettingController extends Controller
             'refer_earn_bg_image' => 'refer_earn_bg_image',
             'subscribe_newsletter_image' => 'subscribe_newsletter_image',
             'no_data_image' => 'no_data_image',
+            'image' => 'order_success',
         ];
 
         foreach ($images as $key => $prefix) {

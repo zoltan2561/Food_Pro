@@ -1935,6 +1935,14 @@
                                                             class="img-fluid rounded h-50px mt-1">
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="col-form-label" for="order_success_image">Sikeres rendelés képe</label>
+                                                        <input type="file" class="form-control" name="image" id="order_success_image" accept="image/*">
+                                                        <img src="{{ helper::image_path(@$getsettings->image ?: 'order-success.svg') }}"
+                                                            class="img-fluid rounded h-50px mt-1" alt="Sikeres rendelés képe">
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="row">
                                                 <div

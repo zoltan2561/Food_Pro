@@ -23,6 +23,12 @@ class AddonsController extends Controller
     }
     public function store(Request $request)
     {
+        $request->validate([
+            'addongroup_id' => 'required|integer|exists:addons_group,id',
+            'name' => 'required|string|max:190',
+            'type' => 'required|in:1,2',
+            'price' => 'required_if:type,2|nullable|numeric|min:0',
+        ]);
         $addons = new Addons();
         $addons->addongroup_id = $request->addongroup_id;
         $addons->name = $request->name;
@@ -38,7 +44,13 @@ class AddonsController extends Controller
     }
     public function update(Request $request)
     {
-        $addons = Addons::find($request->id);
+        $request->validate([
+            'addongroup_id' => 'required|integer|exists:addons_group,id',
+            'name' => 'required|string|max:190',
+            'type' => 'required|in:1,2',
+            'price' => 'required_if:type,2|nullable|numeric|min:0',
+        ]);
+        $addons = Addons::findOrFail($request->id);
         $addons->addongroup_id = $request->addongroup_id;
         $addons->name = $request->name;
         $addons->price = helper::number_format($request->type == 1 ? 0 : $request->price);
@@ -58,7 +70,9 @@ class AddonsController extends Controller
     {
         $category = Addons::where('id', $request->id)->update(array('is_available' => $request->status));
         if ($category) {
-            Cart::where('addons_id', 'LIKE', '%' . $request->id . '%')->delete();
+            if ((int) $request->status !== 1) {
+                $this->clearCartsUsingAddons([(int) $request->id]);
+            }
             return 1;
         } else {
             return 0;
@@ -68,7 +82,7 @@ class AddonsController extends Controller
     {
         $UpdateDetails = Addons::where('id', $request->id)->update(['is_deleted' => '1']);
         if ($UpdateDetails) {
-            Cart::where('addons_id', 'LIKE', '%' . $request->id . '%')->delete();
+            $this->clearCartsUsingAddons([(int) $request->id]);
             return 1;
         } else {
             return 0;
@@ -99,6 +113,7 @@ class AddonsController extends Controller
     }
     public function store_addons_group(Request $request)
     {
+        $this->validateGroup($request);
         $addongroup = new AddonsGroup();
         $addongroup->name = $request->name;
         $addongroup->selection_type = $request->selection_type;
@@ -116,7 +131,8 @@ class AddonsController extends Controller
     }
     public function update_addons_group(Request $request)
     {
-        $addongroup = AddonsGroup::find($request->id);
+        $this->validateGroup($request);
+        $addongroup = AddonsGroup::findOrFail($request->id);
         $addongroup->name = $request->name;
         $addongroup->selection_type = $request->selection_type;
         $addongroup->selection_count = $request->selection_count;
@@ -129,7 +145,9 @@ class AddonsController extends Controller
     {
         $addongroup = AddonsGroup::where('id', $request->id)->update(array('is_available' => $request->status));
         if ($addongroup) {
-            Cart::where('addons_id', 'LIKE', '%' . $request->id . '%')->delete();
+            if ((int) $request->status !== 1) {
+                $this->clearCartsUsingAddons(Addons::where('addongroup_id', $request->id)->pluck('id')->all());
+            }
             return 1;
         } else {
             return 0;
@@ -139,7 +157,7 @@ class AddonsController extends Controller
     {
         $addongroup = AddonsGroup::where('id', $request->id)->update(['is_deleted' => '1']);
         if ($addongroup) {
-            Cart::where('addons_id', 'LIKE', '%' . $request->id . '%')->delete();
+            $this->clearCartsUsingAddons(Addons::where('addongroup_id', $request->id)->pluck('id')->all());
             return 1;
         } else {
             return 0;
@@ -156,5 +174,36 @@ class AddonsController extends Controller
             }
         }
         return response()->json(['status' => 1, 'msg' => 'Update Successfully!!'], 200);
+    }
+
+    private function validateGroup(Request $request): void
+    {
+        $request->validate([
+            'name' => 'required|string|max:190',
+            'selection_type' => 'required|in:1,2',
+            'selection_count' => 'required|in:1,2',
+            'min_count' => 'required_if:selection_count,2|nullable|integer|min:0',
+            'max_count' => 'required_if:selection_count,2|nullable|integer|min:1',
+        ]);
+        if ((int) $request->selection_count === 2
+            && (int) $request->max_count < (int) $request->min_count) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'max_count' => 'A maximum nem lehet kisebb a minimumnál.',
+            ]);
+        }
+    }
+
+    private function clearCartsUsingAddons(array $addonIds): void
+    {
+        $ids = array_map('intval', $addonIds);
+        if (!$ids) return;
+
+        Cart::whereNotNull('addons_id')->where('addons_id', '!=', '')
+            ->chunkById(100, function ($carts) use ($ids) {
+                foreach ($carts as $cart) {
+                    $selected = array_map('intval', preg_split('/\s*\|\s*/', $cart->addons_id));
+                    if (array_intersect($ids, $selected)) $cart->delete();
+                }
+            });
     }
 }
