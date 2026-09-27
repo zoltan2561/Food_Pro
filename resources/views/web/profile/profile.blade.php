@@ -35,8 +35,8 @@
                                     <div class="avatar-upload mx-auto">
                                         <div
                                             class="avatar-edit {{ session()->get('direction') == '2' ? 'avatar-edit-rtl' : '' }}">
-                                            <input type='file' name="profile_image" id="imageupload">
-                                            <label for="imageupload">
+                                            <input type="file" name="profile_image" id="imageupload" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="{{ trans('labels.my_profile') }}">
+                                            <label for="imageupload" title="{{ trans('labels.edit') }}">
                                                 <i class="fa-solid fa-pencil"></i>
                                             </label>
                                         </div>
@@ -50,29 +50,29 @@
                                 </div>
                                 <div class="col-md-9">
                                     <div class="form-group mb-3">
-                                        <label for=""
+                                        <label for="profile_name"
                                             class="form-label mb-2">{{ trans('labels.full_name') }}</label>
-                                        <input type="text" class="form-control" name="name"
-                                            placeholder="{{ trans('labels.full_name') }}" value="{{ Auth::user()->name }}"
+                                        <input type="text" class="form-control" name="name" id="profile_name" autocomplete="name" maxlength="190"
+                                            placeholder="{{ trans('labels.full_name') }}" value="{{ old('name', Auth::user()->name) }}"
                                             required>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for=""
+                                                <label for="profile_email"
                                                     class="form-label mb-2">{{ trans('labels.email') }}</label>
-                                                <input type="email" class="form-control" name="email"
+                                                <input type="email" class="form-control bg-light" name="email" id="profile_email"
                                                     placeholder="{{ trans('labels.email') }}"
-                                                    value="{{ Auth::user()->email }}" disabled>
+                                                    value="{{ Auth::user()->email }}" readonly>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for=""
+                                                <label for="profile_mobile"
                                                     class="form-label mb-2">{{ trans('labels.mobile') }}</label>
-                                                <input type="text" class="form-control" name="mobile"
+                                                <input type="tel" class="form-control bg-light" name="mobile" id="profile_mobile"
                                                     placeholder="{{ trans('labels.mobile') }}"
-                                                    value="{{ Auth::user()->mobile }}" disabled>
+                                                    value="{{ Auth::user()->mobile }}" readonly>
                                             </div>
                                         </div>
                                     </div>
@@ -97,9 +97,10 @@
                                                 {{ trans('labels.email') }}
                                             @endif
                                         </h6>
-                                        <span>
+                                        <form action="{{ URL::to('/profile/send-email-status') }}" method="POST" class="m-0">
+                                            @csrf
                                             <input type="checkbox" class="checkbox-switch" id="send_email-switch"
-                                                data-url="{{ URL::to('/profile/send-email-status') }}" name="send_email"
+                                                name="send_email" value="1" onchange="this.form.submit()"
                                                 {{ Auth::user()->is_mail == 1 ? 'checked' : '' }}>
                                             <label for="send_email-switch" class="switch">
                                                 <span
@@ -110,7 +111,7 @@
                                                 <span
                                                     class="{{ session()->get('direction') == '2' ? 'switch__left ps-2' : 'switch__right pe-2' }}">{{ trans('labels.on') }}</span>
                                             </label>
-                                        </span>
+                                        </form>
                                     </li>
                                     <li class="list-group-item px-0">
                                         <small>
@@ -136,7 +137,7 @@
                                         </label>
                                         <input type="password" class="form-control" name="old_password"
                                             placeholder="{{ trans('labels.old_password') }}" id="old_password"
-                                            value="{{ old('old_password') }}" required>
+                                            autocomplete="current-password" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -146,7 +147,7 @@
                                         </label>
                                         <input type="password" class="form-control" name="new_password"
                                             placeholder="{{ trans('labels.new_password') }}" id="new_password"
-                                            value="{{ old('new_password') }}" required>
+                                            autocomplete="new-password" minlength="8" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -157,7 +158,7 @@
                                         </label>
                                         <input type="password" class="form-control" name="confirm_password"
                                             placeholder="{{ trans('labels.confirm_password') }}" id="confirm_password"
-                                            value="{{ old('confirm_password') }}" required>
+                                            autocomplete="new-password" minlength="8" required>
                                     </div>
                                 </div>
                                 <div class="col-12 {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

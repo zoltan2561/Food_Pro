@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}">
+@php($siteSettings = helper::appdata())
+<html lang="{{ app()->getLocale() }}" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}" data-site-skin="{{ in_array($siteSettings->admin_skin ?? 'spring', ['winter', 'spring', 'summer', 'autumn'], true) ? $siteSettings->admin_skin : 'spring' }}">
 
 <head>
     <meta charset="utf-8">
@@ -60,7 +61,7 @@
             </div>
 
             <!-- index CART item modal -->
-            @if (!request()->is('cart') && !request()->is('checkout'))
+            @if (request()->routeIs('home', 'categories', 'menu', 'search', 'itemdetails', 'viewall'))
                 @if (helper::get_user_cart() != 0)
                     <div class="cart-modal rounded-bottom-0">
                         <div class="rounded-lg">

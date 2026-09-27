@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}">
+@php($siteSkin = helper::appdata()->admin_skin ?? 'spring')
+<html lang="{{ app()->getLocale() }}" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}" data-site-skin="{{ in_array($siteSkin, ['winter', 'spring', 'summer', 'autumn'], true) ? $siteSkin : 'spring' }}">
 
 <head>
     <!-- Required meta tags -->
@@ -43,6 +44,11 @@
                                         class="login-form-logo"></a>
                                 <h5 class="bottom-line py-2 mt-3 mb-0 fw-bold w-auto text-white">{{ trans('labels.signup') }}</h5>
                                 <h6 class="fs-7 text-white">{{ trans('labels.signup_note') }}</h6>
+                                @if (session('error') || $errors->any())
+                                    <div class="alert alert-danger fs-7 mt-3" role="alert">
+                                        {{ session('error') ?: $errors->first() }}
+                                    </div>
+                                @endif
                                 <div class="form-body mt-4">
                                     <div class="form-group mb-md-3 mb-2">
                                         <label class="form-label fs-7 mb-1 text-white"
@@ -51,11 +57,11 @@
                                         </label>
                                         @if (session()->has('social_login'))
                                             <input type="text" class="form-control rounded mb-1" name="name"
-                                                value="{{ session()->get('social_login')['name'] }}" id="name"
+                                                value="{{ session()->get('social_login')['name'] }}" id="name" autocomplete="name" maxlength="190"
                                                 placeholder="{{ trans('labels.full_name') }}" required>
                                         @else
                                             <input type="text" class="form-control rounded mb-1" name="name"
-                                                value="{{ old('name') }}" id="name"
+                                                value="{{ old('name') }}" id="name" autocomplete="name" maxlength="190"
                                                 placeholder="{{ trans('labels.full_name') }}" required>
                                         @endif
                                     </div>
@@ -65,11 +71,11 @@
                                         </label>
                                         @if (session()->has('social_login'))
                                             <input type="email" class="form-control rounded mb-1" name="email"
-                                                value="{{ session()->get('social_login')['email'] }}" id="email"
+                                                value="{{ session()->get('social_login')['email'] }}" id="email" autocomplete="email"
                                                 placeholder="{{ trans('labels.email') }}" required>
                                         @else
                                             <input type="email" class="form-control rounded mb-1" name="email"
-                                                value="{{ old('email') }}" id="email"
+                                                value="{{ old('email') }}" id="email" autocomplete="email"
                                                 placeholder="{{ trans('labels.email') }}" required>
                                         @endif
                                     </div>
@@ -83,7 +89,7 @@
                                                 <input type="tel" id="mobile" name="mobile"
                                                     class="form-control numbers_only rounded"
                                                     placeholder="{{ trans('labels.mobile') }}"
-                                                    value="{{ old('mobile') }}" required>
+                                                    value="{{ old('mobile') }}" inputmode="numeric" autocomplete="tel" minlength="7" maxlength="15" required>
                                             </div>
                                             <div class="col-md">
                                                 <label class="form-label fs-7 mb-1 text-white"
@@ -91,7 +97,7 @@
                                                 <input type="text" class="form-control rounded" id="referral_code"
                                                     name="referral_code"
                                                     placeholder="{{ trans('labels.referral_code_o') }}"
-                                                    @isset($_GET['referral']) value="{{ $_GET['referral'] }}" @endisset>
+                                                    value="{{ old('referral_code', request('referral')) }}">
                                             </div>
                                         </div>
                                     </div>
@@ -108,7 +114,7 @@
                                                         <input type="password" class="form-control rounded mb-1"
                                                             id="password" name="password"
                                                             placeholder="{{ trans('labels.password') }}"
-                                                            value="{{ old('password') }}" required>
+                                                            autocomplete="new-password" minlength="8" required>
                                                     </div>
                                                     <div class="col-md">
                                                         <label class="form-label fs-7 mb-1 text-white"
@@ -118,7 +124,7 @@
                                                         <input type="password" class="form-control rounded mb-1"
                                                             id="confirm_password" name="password_confirmation"
                                                             placeholder="{{ trans('labels.confirm_password') }}"
-                                                            value="{{ old('password_confirmation') }}" required>
+                                                            autocomplete="new-password" minlength="8" required>
                                                         <input type="text" name="website" style="display:none">
                                                         <input type="hidden" name="form_started_at" value="{{ now()->timestamp }}">
 
@@ -129,14 +135,15 @@
                                         @endif
                                     @endif
 
-                                    <div class="form-group">
+                                    <div class="form-group registration-consent">
                                         <input type="checkbox" name="checkbox" id="checkbox" value="1"
                                             required class="form-check-input me-1"
                                             {{ old('checkbox') == 1 ? 'checked' : '' }}>
                                         <label for="checkbox" class="form-check-label m-auto fs-7 text-white">
                                             {{ trans('labels.i_accepts_the') }} <a
                                                 href="{{ URL::to('terms-conditions') }}"
-                                                class="text-primary text-decoration-none fw-medium">{{ trans('labels.terms_conditions') }}</a></label>
+                                                class="text-primary text-decoration-none fw-medium">{{ trans('labels.terms_conditions') }}</a>
+                                            {{ trans('labels.checkout_consent_and') }} <a href="{{ route('privacy-policy') }}" class="text-primary text-decoration-none fw-medium">{{ trans('labels.privacy_policy') }}</a></label>
                                     </div>
 
 
@@ -148,7 +155,7 @@
                                 <div class="form-group text-center mt-3">
                                     <p class="mb-0 fs-7 text-white">
                                         {{ trans('labels.already_account') }}
-                                        <a href="{{ 'login' }}"
+                                        <a href="{{ route('login') }}"
                                             class="text-primary fw-medium text-decoration-none">{{ trans('labels.signin') }}</a>
                                     </p>
                                 </div>
@@ -179,15 +186,7 @@
         @endif
 
         $('.numbers_only').on('keyup', function() {
-            "use strict";
-            var val = $(this).val();
-            if (isNaN(val)) {
-                val = val.replace(/[^0-9\.]/g, '');
-                if (val.split('.').length > 2) {
-                    val = val.replace(/\.+$/, "");
-                }
-            }
-            $(this).val(val);
+            $(this).val($(this).val().replace(/\D/g, '').slice(0, 15));
         });
     </script>
     @if ($errors->any())

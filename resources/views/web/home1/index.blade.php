@@ -983,9 +983,6 @@
             }
         });
     </script>
-@endsection
-
-
 <script>
     (function () {
         // Ha a böngésző nem támogatja, fallback: minden azonnal látszik
@@ -1012,3 +1009,4 @@
         document.querySelectorAll('.reveal').forEach(el => io.observe(el));
     })();
 </script>
+@endsection

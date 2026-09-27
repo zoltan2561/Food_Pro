@@ -80,6 +80,7 @@ class helper
         $fallback = asset('admin-assets/images/item-placeholder.png');
         $filename = basename((string) $image);
         if ($filename === '' || $filename === '.' || $filename === '..') return $fallback;
+        if ($filename === 'unknown.png') return asset('foodpro-assets/avatar-placeholder.svg');
 
         $foodProImage = 'foodpro-assets/' . $filename;
         if (is_file(public_path($foodProImage))) return asset($foodProImage);
@@ -203,9 +204,9 @@ class helper
     {
         $count = 0;
         if (Auth::check() && (int) Auth::user()->type === 2) {
-            $count = Cart::where('user_id', Auth::user()->id)->where('buynow', 0)->count();
+            $count = Cart::where('user_id', Auth::user()->id)->where('buynow', 0)->sum('qty');
         } else {
-            $count = Cart::where('session_id', Session::getId())->where('buynow', 0)->count();
+            $count = Cart::where('session_id', Session::getId())->where('buynow', 0)->sum('qty');
         }
         return $count;
     }

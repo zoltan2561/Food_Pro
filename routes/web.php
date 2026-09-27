@@ -139,8 +139,8 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
             ->name('adduser');
 
         Route::get('/verification', [WebUserController::class, 'verification'])->name('verification');
-        Route::post('/verify-otp', [WebUserController::class, 'verifyotp'])->name('verifyotp');
-        Route::get('/resend-otp', [WebUserController::class, 'resendotp']);
+        Route::post('/verify-otp', [WebUserController::class, 'verifyotp'])->middleware('throttle:5,1')->name('verifyotp');
+        Route::get('/resend-otp', [WebUserController::class, 'resendotp'])->middleware('throttle:3,1');
         //Route::get('/forgot-password', [WebUserController::class, 'forgotpassword'])->name('forgot-password');
         //Route::post('/send-pass', [WebUserController::class, 'sendpass'])->name('sendpass');
         Route::get('/login', [WebUserController::class, 'login'])->name('login');
@@ -211,7 +211,7 @@ Route::group(['namespace' => 'front', 'middleware' => 'MaintenanceMiddleware'], 
 		// user
 		Route::get('/profile', [WebUserController::class, 'getprofile'])->name('user-profile');
 		Route::post('/profile/update', [WebUserController::class, 'editprofile']);
-		Route::get('/profile/send-email-status', [WebUserController::class, 'send_email_status']);
+		Route::post('/profile/send-email-status', [WebUserController::class, 'send_email_status']);
 		Route::get('/refer-earn', [WebUserController::class, 'referearn'])->name('refer-earn');
 		Route::get('/changepassword', [WebUserController::class, 'changepassword'])->name('user-changepassword');
 		Route::post('/changepassword', [WebUserController::class, 'updatepassword']);

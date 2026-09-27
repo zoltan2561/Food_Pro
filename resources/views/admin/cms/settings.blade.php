@@ -67,6 +67,13 @@
                             aria-current="true"> {{ trans('labels.footer_settings') }}
                             <i class="fa-regular fa-angle-{{ session()->get('direction') == '2' ? 'left' : 'right' }}"></i>
                         </a>
+                        @if (Auth::user()->type == 1)
+                        <a href="#navigation_settings" data-tab="navigation_settings"
+                            class="list-group-item basicinfo p-3 list-item-secondary d-flex justify-content-between align-items-center"
+                            aria-current="true">Alsó menü és lábléc linkek
+                            <i class="fa-regular fa-angle-{{ session()->get('direction') == '2' ? 'left' : 'right' }}"></i>
+                        </a>
+                        @endif
                         <a href="#mobile_settings" data-tab="mobile_settings"
                             class="list-group-item basicinfo p-3 list-item-secondary d-flex justify-content-between align-items-center"
                             aria-current="true"> {{ trans('labels.mobile_app_settings') }}
@@ -633,10 +640,10 @@
                                 <div class="col-12">
                                     <div class="card border-0 box-shadow">
                                         <div class="card-header p-3 bg-secondary">
-                                            <h5 class="text-white mb-0">Admin megjelenés</h5>
+                                            <h5 class="text-white mb-0">Évszakos megjelenés – admin és vásárlói oldal</h5>
                                         </div>
                                         <div class="card-body">
-                                            <p class="text-muted">A választott évszak az egész adminfelület színeit és elrendezését módosítja.</p>
+                                            <p class="text-muted">A választott évszak az admin és a vásárlói oldal színeit, felületeit és kiemeléseit együtt módosítja.</p>
                                             <form action="{{ URL::to('admin/settings/update') }}" method="post">
                                                 @csrf
                                                 <input type="hidden" name="admin_skin_update" value="1">
@@ -661,7 +668,7 @@
                                                         </div>
                                                     @endforeach
                                                 </div>
-                                                <button type="submit" class="btn btn-primary">Admin téma mentése</button>
+                                                <button type="submit" class="btn btn-primary">Évszakos téma mentése</button>
                                             </form>
                                         </div>
                                     </div>
@@ -669,6 +676,46 @@
                             </div>
                         @endif
                     </div>
+
+                    @if (Auth::user()->type == 1)
+                    <div id="navigation_settings">
+                        <div class="card border-0 box-shadow mb-3">
+                            <div class="card-header p-3 bg-secondary"><h5 class="text-white mb-0">Alsó menü és lábléc linkek</h5></div>
+                            <div class="card-body">
+                                <p class="text-muted">Válaszd ki a céloldalt, a megjelenő feliratot, a sorrendet és az aktív állapotot. Üres feliratnál a nyelvi beállítások szövege jelenik meg.</p>
+                                <form action="{{ URL::to('admin/settings/update') }}" method="post">
+                                    @csrf
+                                    <input type="hidden" name="navigation_update" value="1">
+                                    @foreach (['mobile' => 'Mobil alsó menü', 'footer_pages' => 'Lábléc – oldalak', 'footer_other' => 'Lábléc – további linkek'] as $section => $heading)
+                                        <h6 class="fw-bold mt-4">{{ $heading }}</h6>
+                                        <div class="table-responsive">
+                                            <table class="table align-middle">
+                                                <thead><tr><th>Céloldal</th><th>Felirat</th><th>Sorrend</th><th>Aktív</th></tr></thead>
+                                                <tbody>
+                                                    @foreach (\App\Support\SiteNavigation::slots($section, $getsettings) as $index => $slot)
+                                                        <tr>
+                                                            <td>
+                                                                <select name="navigation[{{ $section }}][{{ $index }}][key]" class="form-select" aria-label="Céloldal" required>
+                                                                    @foreach (\App\Support\SiteNavigation::choices() as $key => $target)
+                                                                        <option value="{{ $key }}" {{ $slot['key'] === $key ? 'selected' : '' }}>{{ trans('labels.' . $target['label']) }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </td>
+                                                            <td><input type="text" name="navigation[{{ $section }}][{{ $index }}][label]" class="form-control" value="{{ $slot['label'] }}" maxlength="32" placeholder="{{ trans('labels.' . \App\Support\SiteNavigation::choices()[$slot['key']]['label']) }}" aria-label="Menüpont felirata"></td>
+                                                            <td><input type="number" name="navigation[{{ $section }}][{{ $index }}][order]" class="form-control" value="{{ $slot['order'] }}" min="1" max="99" style="max-width: 90px" aria-label="Sorrend" required></td>
+                                                            <td><input type="checkbox" name="navigation[{{ $section }}][{{ $index }}][enabled]" value="1" class="form-check-input" {{ $slot['enabled'] ? 'checked' : '' }} aria-label="Aktív"></td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endforeach
+                                    <button type="submit" class="btn btn-primary">Menü mentése</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
 
                     <div id="business_settings">
                         <div class="row mb-3">

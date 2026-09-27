@@ -198,41 +198,19 @@
 <div class="mobile_menu_footer d-lg-none">
     <div class="container">
         <ul class="d-flex justify-content-between align-items-center mb-0 gap-3">
-            <li class="text-center">
-                <a href="{{ route('home') }}" class="{{ request()->is('/') ? 'active1' : '' }}">
-                    <i class="fa-light fa-house"></i>
-                    <p class="mb-0">{{ trans('labels.home') }}</p>
-                </a>
-            </li>
-            <li class="text-center">
-                <a href="{{ route('search') }}" class="{{ request()->is('search') ? 'active1' : '' }}">
-                    <i class="fa-light fa-magnifying-glass"></i>
-                    <p class="mb-0">{{ trans('labels.search') }}</p>
-                </a>
-            </li>
-            <li class="text-center">
-                <a href="{{ route('cart') }}" class="{{ request()->is('cart') ? 'active1' : '' }}">
-                    <div class="position-relative">
-                        <i class="fa-light fa-bag-shopping"></i>
-                        <span class="qut_counter">{{ helper::get_user_cart() }}</span>
-                    </div>
-                    <p class="mb-0">{{ trans('labels.cart') }}</p>
-                </a>
-            </li>
-            <li class="text-center">
-                <a href="{{ Auth::user() ? route('user-favouritelist') : route('login') }}"
-                   class="{{ request()->is('favouritelist') ? 'active1' : '' }}">
-                    <i class="fa-light fa-heart"></i>
-                    <p class="mb-0">{{ trans('labels.wishlist') }}</p>
-                </a>
-            </li>
-            <li class="text-center">
-                <a href="{{ Auth::user() ? route('user-profile') : route('login') }}"
-                   class="{{ request()->is('profile') ? 'active1' : '' }}">
-                    <i class="fa-light fa-user"></i>
-                    <p class="mb-0">{{ trans('labels.account') }}</p>
-                </a>
-            </li>
+            @foreach (\App\Support\SiteNavigation::links('mobile', $siteSettings ?? null) as $link)
+                <li class="text-center">
+                    <a href="{{ $link['url'] }}" class="{{ $link['active'] ? 'active1' : '' }}" {{ $link['active'] ? 'aria-current=page' : '' }}>
+                        <span class="position-relative">
+                            <i class="fa-solid {{ $link['icon'] }}" aria-hidden="true"></i>
+                            @if ($link['key'] === 'cart')
+                                <span class="qut_counter">{{ helper::get_user_cart() }}</span>
+                            @endif
+                        </span>
+                        <span class="mobile-nav-label">{{ $link['label'] }}</span>
+                    </a>
+                </li>
+            @endforeach
         </ul>
     </div>
 </div>

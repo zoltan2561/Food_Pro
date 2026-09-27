@@ -34,11 +34,13 @@ class UserController extends Controller
     }
     public function create(Request $request)
     {
+        $passwordRequired = !session()->has('social_login') && !helper::checkaddons('otp');
         $data = $request->validate([
-            'name'    => 'required',
+            'name'    => 'required|string|max:190',
             'email'   => 'required|email',
-            'mobile'  => 'required|numeric',
+            'mobile'  => 'required|digits_between:7,15',
             'checkbox'=> 'accepted',
+            'password' => $passwordRequired ? 'required|string|min:8|confirmed' : 'nullable|string|min:8|confirmed',
         ], [
             'name.required'       => trans('messages.name_required'),
             'email.required'      => trans('messages.email_required'),
@@ -67,7 +69,7 @@ class UserController extends Controller
             }
         } else {
             $email      = $request->email;
-            $password   = \Hash::make($request->password);
+            $password   = $request->filled('password') ? Hash::make($request->password) : '';
             $login_type = "email";
         }
 
@@ -77,14 +79,14 @@ class UserController extends Controller
             ->where('is_available', 1)->where('is_deleted', 2)->first();
 
         if ($request->filled('referral_code') && empty($checkreferral)) {
-            return redirect()->back()->with('error', trans('messages.invalid_referral_code'));
+            return redirect()->back()->withInput($request->except('password', 'password_confirmation'))->with('error', trans('messages.invalid_referral_code'));
         }
 
         if (User::where('mobile',$request->mobile)->where('is_available',1)->where('is_deleted',2)->exists()) {
-            return redirect()->back()->with('error', trans('messages.mobile_exist'));
+            return redirect()->back()->withInput($request->except('password', 'password_confirmation'))->with('error', trans('messages.mobile_exist'));
         }
         if (User::where('email',$request->email)->where('is_available',1)->where('is_deleted',2)->exists()) {
-            return redirect()->back()->with('error', trans('messages.email_exist'));
+            return redirect()->back()->withInput($request->except('password', 'password_confirmation'))->with('error', trans('messages.email_exist'));
         }
 
         // 1) User létrehozása PENDING állapotban (is_verified = 2)
@@ -109,29 +111,30 @@ class UserController extends Controller
         }
 
         // NEM állítunk email_verified_at-et itt
-        $user->save();
-        session()->forget('social_login');
-
         // 2) OTP generálás + küldés (SMS addon esetén SMS, különben e-mail)
-        $otp = rand(100000, 999999);
+        $otp = random_int(100000, 999999);
 
 // mail konfig frissítése (nálatok így szokás)
-        $emaildata = helper::emailconfigration();
-        \Config::set('mail', $emaildata);
-
-// KÜLDÉS
-        $sent = helper::verificationemail($user->email, $otp);
+        $usesSms = (bool) helper::checkaddons('otp');
+        if ($usesSms) {
+            $sent = sms_helper::verificationsms($user->mobile, $otp);
+        } else {
+            $emaildata = helper::emailconfigration();
+            Config::set('mail', $emaildata);
+            $sent = helper::verificationemail($user->email, $otp);
+        }
         if ($sent != 1) {
-            return redirect()->back()->with('error', trans('messages.email_error'));
+            return redirect()->back()->withInput($request->except('password', 'password_confirmation'))->with('error', trans('messages.email_error'));
         }
 
 // OTP mentése a userhez + session beállítás a verify oldalnak
         $user->otp = $otp;
         $user->is_verified = 2; // függőben
         $user->save();
+        session()->forget('social_login');
 
-        session()->put('verification_email', $user->email);
-        if (env('Environment') == 'sendbox') {
+        session()->put('verification_email', $usesSms ? $user->mobile : $user->email);
+        if (env('Environment') == 'sendbox' || (app()->environment('local') && config('mail.default') === 'log' && !$usesSms)) {
             session()->put('verification_otp', $otp);
         }
 
@@ -240,15 +243,21 @@ class UserController extends Controller
     }
     public function resendotp()
     {
-        $otp = rand(100000, 999999);
+        $otp = random_int(100000, 999999);
 
         if (@helper::checkaddons('otp')) {
             $mobile = session()->get('verification_email');
             $checkuser = User::where('mobile', $mobile)->where('is_deleted', 2)->first();
+            if (!$checkuser) {
+                return redirect(route('login'))->with('error', trans('messages.invalid_user'));
+            }
             $verification = sms_helper::verificationsms($mobile, $otp);
         } else {
             $email = session()->get('verification_email');
             $checkuser = User::where('email', $email)->where('is_deleted', 2)->first();
+            if (!$checkuser) {
+                return redirect(route('login'))->with('error', trans('messages.invalid_user'));
+            }
             $emaildata = helper::emailconfigration();
             Config::set('mail', $emaildata);
             $verification = helper::verificationemail($email, $otp);
@@ -257,7 +266,7 @@ class UserController extends Controller
             $checkuser->otp = $otp;
             $checkuser->is_verified = 2;
             $checkuser->save();
-            if (env('Environment') == 'sendbox') {
+            if (env('Environment') == 'sendbox' || (app()->environment('local') && config('mail.default') === 'log' && !helper::checkaddons('otp'))) {
                 session()->put('verification_otp', $otp);
             }
             return redirect()->back()->with('success', trans('messages.email_sent'));
@@ -383,28 +392,18 @@ class UserController extends Controller
     }
     public function editprofile(Request $request)
     {
-        if ($request->hasFile('profile_image')) {
-            $validator = Validator::make($request->all(), [
-                'profile_image' => 'image',
-            ], [
-                "profile_image.image" => trans('messages.enter_image_file'),
-            ]);
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            } else {
-                if (Auth::user()->profile_image != "unknown.png" && file_exists(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . Auth::user()->profile_image)) {
-                    unlink(env('ASSETSPATHURL') . 'admin-assets/images/profile/' . Auth::user()->profile_image);
-                }
-                $file = $request->file("profile_image");
-                $filename = 'profile-' . time() . "." . $file->getClientOriginalExtension();
-                $file->move(env('ASSETSPATHURL') . 'admin-assets/images/profile', $filename);
-                $checkuser = User::find(Auth::user()->id);
-                $checkuser->profile_image = $filename;
-                $checkuser->save();
-            }
-        }
+        $validated = $request->validate([
+            'name' => 'required|string|max:190',
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+        ]);
         $checkuser = User::find(Auth::user()->id);
-        $checkuser->name = $request->name;
+        if ($request->hasFile('profile_image')) {
+            $file = $request->file('profile_image');
+            $filename = 'profile-' . \Illuminate\Support\Str::uuid() . '.' . $file->extension();
+            $file->move(public_path('admin-assets/images/profile'), $filename);
+            $checkuser->profile_image = $filename;
+        }
+        $checkuser->name = trim($validated['name']);
         $checkuser->save();
         return redirect()->back()->with('success', trans('messages.success'));
     }
@@ -412,7 +411,7 @@ class UserController extends Controller
     {
         if (Auth::user() && Auth::user()->type == 2) {
             $checkuser = User::find(Auth::user()->id);
-            $checkuser->is_mail = $checkuser->is_mail == 1 ? 2 : 1;
+            $checkuser->is_mail = $request->boolean('send_email') ? 1 : 2;
             $checkuser->save();
             return redirect(url()->previous())->with('success', trans('messages.success'));
         }
@@ -429,7 +428,9 @@ class UserController extends Controller
     public function updatepassword(Request $request)
     {
         $request->validate([
-            'confirm_password' => 'same:new_password'
+            'old_password' => 'required|string',
+            'new_password' => 'required|string|min:8|different:old_password',
+            'confirm_password' => 'required|same:new_password',
         ], [
             'confirm_password.same' => trans('messages.confirm_password_same')
         ]);

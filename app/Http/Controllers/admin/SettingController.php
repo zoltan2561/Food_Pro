@@ -11,6 +11,9 @@ use App\Models\Settings;
 use App\Models\SocialLinks;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\helper;
+use App\Support\SiteNavigation;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class SettingController extends Controller
 {
@@ -57,6 +60,42 @@ class SettingController extends Controller
             $setting->admin_skin = $validated['admin_skin'];
             $setting->save();
             return redirect()->back()->with('success', trans('messages.success'));
+        }
+
+        if ($request->boolean('navigation_update')) {
+            abort_unless((int) auth()->user()->type === 1, 403);
+            $validated = $request->validate([
+                'navigation' => 'required|array',
+                'navigation.mobile' => 'required|array|min:1|max:5',
+                'navigation.footer_pages' => 'required|array|min:1|max:8',
+                'navigation.footer_other' => 'required|array|min:1|max:8',
+                'navigation.*.*.key' => ['required', Rule::in(array_keys(SiteNavigation::choices()))],
+                'navigation.*.*.label' => 'nullable|string|max:32',
+                'navigation.*.*.order' => 'required|integer|min:1|max:99',
+                'navigation.*.*.enabled' => 'nullable|boolean',
+            ]);
+            $sections = [];
+            foreach (['mobile', 'footer_pages', 'footer_other'] as $section) {
+                $rows = $validated['navigation'][$section];
+                $keys = array_column($rows, 'key');
+                if (count($keys) !== count(array_unique($keys))) {
+                    throw ValidationException::withMessages(['navigation' => 'Egy menüben minden céloldal csak egyszer szerepelhet.']);
+                }
+                foreach ($rows as $row) {
+                    $sections[$section][] = [
+                        'key' => $row['key'],
+                        'label' => trim($row['label'] ?? ''),
+                        'enabled' => (bool) ($row['enabled'] ?? false),
+                        'order' => (int) $row['order'],
+                    ];
+                }
+            }
+            if (!collect($sections['mobile'])->contains('enabled', true)) {
+                throw ValidationException::withMessages(['navigation' => 'Legalább egy alsó menüpont legyen aktív.']);
+            }
+            $setting->navigation_config = json_encode($sections, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            $setting->save();
+            return redirect('admin/settings#navigation_settings')->with('success', trans('messages.success'));
         }
 
         if ($request->contact_update) {

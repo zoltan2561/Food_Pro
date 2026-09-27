@@ -20,6 +20,7 @@
         </div>
     </div>
 
+    <nav aria-label="{{ trans('labels.account') }}"><ul class="list-unstyled mb-0">
     <li>
         <a class="{{ request()->is('profile') ? 'active' : '' }}" href="{{ route('user-profile') }}">
             <i class="mx-2 fa-regular fa-user"></i>{{ trans('labels.my_profile') }} </a>
@@ -31,6 +32,10 @@
     <li>
         <a class="{{ request()->is('favouritelist') ? 'active' : '' }}" href="{{ route('user-favouritelist') }}">
             <i class="mx-2 fa-regular fa-heart"></i>{{ trans('labels.favourite_list') }} </a>
+    </li>
+    <li>
+        <a class="{{ request()->is('changepassword') ? 'active' : '' }}" href="{{ route('user-changepassword') }}">
+            <i class="mx-2 fa-solid fa-key"></i>{{ trans('labels.change_password') }} </a>
     </li>
 
     @if (helper::appdata()->pickup_delivery != 3)
@@ -56,6 +61,7 @@
             onclick="logout('{{ route('logout') }}','{{ trans('messages.are_you_sure_logout') }}','{{ trans('labels.logout') }}')">
             <i class="mx-2 fa fa-arrow-right-from-bracket"></i>{{ trans('labels.logout') }} </a>
     </li>
+    </ul></nav>
 </div>
 
 
@@ -66,7 +72,7 @@
                 data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
                 aria-controls="panelsStayOpen-collapseTwo">
                 <i class="mx-2 fa-solid fa-bars text-white"></i>
-                <p class="text-white mb-0">Navigation</p>
+                <p class="text-white mb-0">{{ trans('labels.account') }}</p>
             </button>
         </h2>
         <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse" style="">

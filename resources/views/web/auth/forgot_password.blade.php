@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}">
+@php($siteSkin = helper::appdata()->admin_skin ?? 'spring')
+<html lang="{{ app()->getLocale() }}" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}" data-site-skin="{{ in_array($siteSkin, ['winter', 'spring', 'summer', 'autumn'], true) ? $siteSkin : 'spring' }}">
 
 <head>
     <meta charset="utf-8">

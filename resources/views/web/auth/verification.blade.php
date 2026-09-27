@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}">
+@php($siteSkin = helper::appdata()->admin_skin ?? 'spring')
+<html lang="{{ app()->getLocale() }}" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}" data-site-skin="{{ in_array($siteSkin, ['winter', 'spring', 'summer', 'autumn'], true) ? $siteSkin : 'spring' }}">
 
 <head>
     <!-- Required meta tags -->
@@ -54,9 +55,12 @@
                                     </p>
                                 </div>
                                 <div class="m-3">
+                                    @if (session()->has('verification_otp'))
+                                        <p class="alert alert-info text-center">{{ trans('labels.demo_verification_code') }}: <strong>{{ session('verification_otp') }}</strong></p>
+                                    @endif
                                     <input type="text" name="otp" class="form-control rounded"
-                                        placeholder="KÓD" required
-                                        @if (env('Environment') == 'sendbox') value="{{ session()->get('verification_otp') }}" readonly @else value="{{ old('otp') }}" @endif>
+                                        placeholder="{{ trans('labels.verification_code') }}" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required
+                                        @if (session()->has('verification_otp')) value="{{ session()->get('verification_otp') }}" @else value="{{ old('otp') }}" @endif>
                                 </div>
                                 <div class="m-3 d-grid">
                                     <button type="submit"

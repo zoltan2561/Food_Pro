@@ -44,9 +44,9 @@
                                         @foreach ($getcartlist as $cartitems)
                                             {{-- ⬇⬇⬇ SOR AZONOSÍTÓ A KÖNNYŰ ELTÁVOLÍTÁSHOZ --}}
                                             <tr id="row-{{ $cartitems->id }}" data-cart-row>
-                                                <td>
+                                                <td class="cart-product-cell">
                                                     <div class="tbl_cart_product gap-3">
-                                                        <div class="col-auto d-none d-md-flex  justify-content-center item-img-none">
+                                                        <div class="col-auto d-flex justify-content-center item-img-none">
                                                             <div class="item-img">
                                                                 <img src="{{ helper::image_path($cartitems->item_image) }}" alt="item-image">
                                                             </div>
@@ -80,42 +80,43 @@
                                                     $order_total += (float) $total_price;
                                                     $total_item_qty += $cartitems->qty;
                                                 @endphp
-                                                <td>
+                                                <td data-label="{{ trans('labels.price') }}">
                                                     <h4 class="tbl_org_price">
                                                         {{ helper::currency_format($cartitems->item_price + $cartitems->addons_total_price + $cartitems->extras_total_price) }}
                                                     </h4>
                                                 </td>
-                                                <td>
-                                                    <nav aria-label="Page navigation example">
+                                                <td data-label="{{ trans('labels.qty') }}">
+                                                    <div aria-label="{{ trans('labels.qty') }}">
                                                         <ul class="qtladd mb-0 {{ session()->get('direction') == '2' ? 'rtl' : '' }}">
                                                             <li>
-                                                                <button class="qty_button"
+                                                                <button type="button" class="qty_button" aria-label="{{ trans('labels.qty') }} −" {{ $cartitems->qty <= 1 ? 'disabled' : '' }}
                                                                         onclick="qtyupdate('{{ $cartitems['id'] }}','minus','{{ URL::to('/cart/qtyupdate') }}')">
                                                                     <span aria-hidden="true"><i class="fa-light fa-minus fs-10"></i></span>
                                                                 </button>
                                                             </li>
                                                             <li class="qtl-count">
-                                                                <input type="text" class="border py-1 w-100"
+                                                                <input type="text" class="border py-1 w-100" aria-label="{{ trans('labels.qty') }}"
                                                                        id="number_{{ $cartitems->id }}" name="number"
                                                                        value="{{ $cartitems->qty }}" readonly>
                                                             </li>
                                                             <li>
-                                                                <button class="qty_button"
+                                                                <button type="button" class="qty_button" aria-label="{{ trans('labels.qty') }} +"
                                                                         onclick="qtyupdate('{{ $cartitems['id'] }}','plus','{{ URL::to('/cart/qtyupdate') }}')">
                                                                     <span aria-hidden="true"><i class="fa-light fa-plus fs-10"></i></span>
                                                                 </button>
                                                             </li>
                                                         </ul>
-                                                    </nav>
+                                                    </div>
                                                 </td>
-                                                <td>
+                                                <td data-label="{{ trans('labels.total') }}">
                                                     <h4 class="tbl_org_price">{{ helper::currency_format($total_price) }}</h4>
                                                 </td>
-                                                <td>
+                                                <td class="cart-remove-cell">
                                                     <div class="tbl_pr_action">
                                                         {{-- ⬇⬇⬇ TÖRLÉS GOMB (NEM LINK), NINCS NAVIGÁCIÓ --}}
                                                         <button type="button"
                                                                 class="tbl_remove btn-remove"
+                                                                aria-label="{{ trans('labels.delete') }}: {{ $cartitems->item_name }}"
                                                                 title="{{ trans('labels.delete') }}"
                                                                 data-id="{{ $cartitems['id'] }}"
                                                                 data-row="#row-{{ $cartitems['id'] }}"
@@ -139,9 +140,9 @@
                                     </a>
                                 </div>
                                 <div class="col-xl-3 col-lg-4 col-sm-6 col-12 {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
-                                    <button class="btn btn-primary w-100 d-flex gap-3 justify-content-center align-items-center cart_checkout"
+                                    <button type="button" class="btn btn-primary w-100 d-flex gap-3 justify-content-center align-items-center cart_checkout"
                                             onclick="isopenclose('{{ URL::to('/isopenclose') }}','{{ $total_item_qty }}','{{ $order_total }}')">
-                                        {{ trans('labels.continue') }}
+                                        {{ trans('labels.checkout_cta') }}
                                         <div class="loader d-none cart_checkout_loader"></div>
                                     </button>
                                 </div>

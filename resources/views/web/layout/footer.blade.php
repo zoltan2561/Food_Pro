@@ -42,40 +42,17 @@
                             <div class="col-md-4 col-lg-4 col-xl-4 col-6 mb-4 mb-sm-0">
                                 <h4>{{ trans('labels.pages') }}</h4>
                                 <ul>
-                                    <li><a href="{{ route('about-us') }}"
-                                            class="text-white">{{ trans('labels.about') }}</a>
-                                    </li>
-                                    <li><a href="{{ route('privacy-policy') }}"
-                                            class="text-white">{{ trans('labels.privacy_policy') }}</a></li>
-                                    <li><a href="{{ route('refund-policy') }}"
-                                            class="text-white">{{ trans('labels.refund_policy') }}</a></li>
-                                    <li><a href="{{ route('terms-conditions') }}"
-                                            class="text-white">{{ trans('labels.terms_condition') }}</a></li>
-                                    <li>
-                                        <a href="{{ route('allergens') }}" class="text-white">
-                                            {{ trans('labels.allergen_table') }}
-                                        </a>
-                                    </li>
+                                    @foreach (\App\Support\SiteNavigation::links('footer_pages', $siteSettings ?? null) as $link)
+                                        <li><a href="{{ $link['url'] }}" class="text-white">{{ $link['label'] }}</a></li>
+                                    @endforeach
                                 </ul>
                             </div>
                             <div class="col-md-4 col-lg-4 col-xl-4 col-6 mb-4 mb-sm-0">
                                 <h4>{{ trans('labels.other') }}</h4>
                                 <ul>
-                                    <li><a href="{{ route('categories') }}"
-                                            class="text-white">{{ trans('labels.menu') }}</a>
-                                    </li>
-                                    <li><a href="{{ route('faq') }}" class="text-white">{{ trans('labels.faq') }}</a>
-                                    </li>
-                                    <li><a href="{{ route('contact-us') }}"
-                                            class="text-white">{{ trans('labels.help_contact_us') }}</a></li>
-                                    <li><a href="{{ route('gallery') }}"
-                                            class="text-white">{{ trans('labels.gallery') }}</a>
-                                    </li>
-                                    @if (@helper::checkaddons('blog'))
-                                        <li><a href="{{ route('blogs') }}"
-                                                class="text-white">{{ trans('labels.blogs') }}</a>
-                                        </li>
-                                    @endif
+                                    @foreach (\App\Support\SiteNavigation::links('footer_other', $siteSettings ?? null) as $link)
+                                        <li><a href="{{ $link['url'] }}" class="text-white">{{ $link['label'] }}</a></li>
+                                    @endforeach
                                 </ul>
                             </div>
                             <div class="col-md-4 col-lg-4 col-xl-4 col-12 mb-4 mb-sm-0">
