@@ -8,7 +8,7 @@ Testreszabható, Laravel 9 alapú éttermi rendelési felület kis éttermek sz�
 2. Futtasd a projekt gyökerében: `composer install`.
 3. Másold a `.env.example` fájlt `.env` néven, állítsd be a saját MySQL kapcsolatot és az `APP_URL` értékét. A példában az adatbázis neve `food_pro`. Futtasd: `php artisan key:generate`.
 4. Hozz létre egy üres `food_pro` adatbázist `utf8mb4_unicode_ci` illesztéssel, majd importáld a [kezdő SQL-t](database/food_pro_starter.sql) phpMyAdminból. A forrásként használt `gyros2` adatbázist ne írd felül.
-5. Futtasd: `php artisan migrate --force`, majd `php artisan db:seed --class=FoodProDemoSeeder`. Hozd létre a `storage/installed` üres fájlt; az eredeti alkalmazás ezt a telepítettség jelzőjeként használja.
+5. Futtasd: `php artisan migrate --force`, majd `php artisan db:seed --class=FoodProDemoSeeder`.
 6. Futtasd a `php artisan foodpro:admin-password` parancsot, és adj meg egy legalább 12 karakteres új jelszót. Az admin címe kezdetben `admin@foodpro.local`; a parancs argumentumával saját címet is adhatsz meg, például `php artisan foodpro:admin-password admin@etterem.hu`.
 7. Nyisd meg az oldalt és az `/admin` címet. Gyors helyi ellenőrzéshez használható a `php artisan serve` parancs; ekkor az `APP_URL` is a kiszolgáló címére mutasson.
 
@@ -51,12 +51,11 @@ domains/foodpro.shop/
    ```sh
    php artisan migrate --force
    php artisan db:seed --class=FoodProDemoSeeder --force
-   touch storage/installed
    php artisan foodpro:admin-password admin@foodpro.local
    ```
 
    A demófeltöltőt későbbi éles frissítéseknél ne futtasd újra. Az `APP_KEY` értéket és az adatbázist rendszeres mentés védje; az alkalmazáskulcs megváltoztatása a meglévő munkameneteket érvényteleníti. A jelenlegi alkalmazás azonnali (`sync`) sort és fájlos munkamenetet használ; az Artisan ütemezőjében nincs aktív feladat, ezért külön cron nem szükséges.
-   A `storage/installed` jelzőfájl nem része a Git-repónak. Ha hiányzik, a főoldal a régi webes telepítőre irányít. A telepítőt ne töltsd ki nyilvános domainen: az adatbázis importja és az Artisan lépések után az alkalmazás `storage` mappájában hozd létre a fájlt (`touch storage/installed`), nem a `public_html/storage` könyvtárban. A Hostinger hPanel **File Manager → Access all files** nézetéből SSH nélkül is létrehozható. A webes `/install` és `/update` útvonalat a nyilvános `.htaccess` tiltja.
+   A régi `storage/installed` jelzőfájlra a Food Pro már nem támaszkodik. A webes `/install` és `/update` útvonalat az alkalmazás és a nyilvános `.htaccess` is tiltja; a telepítés adatbázis importtal és Artisan-parancsokkal történik. Korábban telepített példánynál az `/install` átirányítás a régi kódra utal: frissítsd a PHP fájlokat, szükség esetén ürítsd a Laravel gyorsítótárát, és ellenőrizd újra a főoldalt.
 6. Ellenőrizd a főoldalt, a CSS-t/képeket, az `/admin` bejelentkezést, egy tesztrendelést és az adminos képfeltöltést. A `https://foodpro.shop/composer.json` és `https://foodpro.shop/.env` cím nem szolgálhat ki fájlt. Az admin **Fizetések** lapján a Barion maradjon kikapcsolva, amíg a saját sandbox e-mail/POSKey és a HTTPS callback (`https://foodpro.shop/barion/callback`) nincs beállítva és kipróbálva. A tesztfizetés után éles vásárlókat csak valódi éttermi, jogi és levelezési adatokkal fogadj.
 
 Frissítéskor a `foodpro-app` mappában `git pull --ff-only`, majd szükség esetén `composer2 install --no-dev --prefer-dist --optimize-autoloader` és `php artisan migrate --force` után ismételd meg a két `cp` lépést. A frissítés előtt mentsd az adatbázist, a `.env` fájlt és a `public_html` feltöltéseit. A kódban több helyen közvetlen `env()` hívás van, ezért jelenleg ne futtasd a `php artisan config:cache` parancsot; az alkalmazás működését az aktív szerverkörnyezettel ellenőrizd.
