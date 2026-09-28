@@ -12,7 +12,53 @@ Testreszabható, Laravel 9 alapú éttermi rendelési felület kis éttermek sz�
 6. Futtasd a `php artisan foodpro:admin-password` parancsot, és adj meg egy legalább 12 karakteres új jelszót. Az admin címe kezdetben `admin@foodpro.local`; a parancs argumentumával saját címet is adhatsz meg, például `php artisan foodpro:admin-password admin@etterem.hu`.
 7. Nyisd meg az oldalt és az `/admin` címet. Gyors helyi ellenőrzéshez használható a `php artisan serve` parancs; ekkor az `APP_URL` is a kiszolgáló címére mutasson.
 
-Éles telepítésnél a webkiszolgáló gyökere a `public` könyvtár legyen, `APP_DEBUG=false` értékkel és HTTPS címmel. A `vendor`, `.env`, valamint a helyi mentések nem részei az átadható forrásnak.
+Éles telepítésnél csak a nyilvános belépési pont és az assetek kerülhetnek a webgyökérbe. A `.env`, a `vendor`, az adatbázis és a mentések nem lehetnek HTTP-n elérhetők.
+
+## Hostinger telepítés: foodpro.shop
+
+A [Hostinger Web/Cloud tárhely webgyökere](https://support.hostinger.com/en/articles/1583494-what-is-the-path-to-your-website-s-root-home-directory-and-how-to-change-it) jellemzően `public_html`, amelyet hPanelben nem lehet átállítani. Ehhez a repóban van [Hostinger belépési pont](deploy/hostinger/index.php) és [nyilvános .htaccess](public/.htaccess). A példa SSH-val, [Hostinger Composer 2](https://www.hostinger.com/support/5792078-how-to-use-composer-at-hostinger/) paranccsal és új, üres webhellyel számol; a tényleges gyökérútvonalat a hPanel **FTP Accounts** lapján ellenőrizd. A jelenlegi kód helyben PHP 8.2 alatt ellenőrzött; Hostingerben válassz támogatott PHP-verziót, és ellenőrizd annak bővítményeit is.
+
+```text
+domains/foodpro.shop/
+├── foodpro-app/       # teljes Git-repó, .env, vendor, storage; a webgyökéren kívül
+└── public_html/       # a foodpro-app/public tartalma, majd a Hostinger index.php
+```
+
+1. A hPanelben add hozzá a `foodpro.shop` domaint, irányítsd rá a DNS-t, hozz létre külön MySQL-adatbázist és felhasználót, kapcsold be az SSH-t, és telepíts SSL-t. Az SSL lapon legyen bekapcsolva a [**Force HTTPS**](https://support.hostinger.com/en/articles/1583201-how-to-enable-or-disable-https-for-your-website-at-hostinger). Egyetlen kanonikus domaint használj; az alábbi példa a `www` nélküli címet használja.
+2. Új telepítésnél a domain könyvtárában futtasd az alábbi parancsokat. Ha a `public_html` már tartalmaz webhelyet vagy feltöltéseket, előbb készíts mentést, és a másolást ahhoz igazítsd. A `public_html` könyvtárat ne töröld.
+
+   ```sh
+   cd ~/domains/foodpro.shop
+   git clone https://github.com/zoltan2561/Food_Pro.git foodpro-app
+   cd foodpro-app
+   cp .env.example .env
+   ```
+
+3. A szerveren, kizárólag a `foodpro-app/.env` fájlban állítsd be az `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://foodpro.shop`, `LOG_LEVEL=warning`, `SESSION_SECURE_COOKIE=true` értékeket, az új adatbázis hozzáférését és egy működő SMTP-küldőt. Az `ASSETSPATHURL` maradjon üres vagy hiányozzon. A helyi `.env` és az XAMPP-adatbázis ne kerüljön fel. Az admin e-mail kezdetben `admin@foodpro.local` helyőrző; éles ügyféloldalhoz állíts be valódi címet.
+4. A `foodpro-app` könyvtárból telepítsd a függőségeket, majd másold a nyilvános fájlokat. A második másolás szándékosan cseréli a szokásos Laravel `index.php` fájlt a kétmappás elrendezéshez. Későbbi frissítéskor ne használj `--delete` jellegű szinkronizálást, mert az admin által feltöltött képek a `public_html` könyvtárban élnek.
+
+   ```sh
+   composer2 install --no-dev --prefer-dist --optimize-autoloader
+   composer2 check-platform-reqs --no-dev
+   php artisan key:generate
+   cp -a public/. ../public_html/
+   cp deploy/hostinger/index.php ../public_html/index.php
+   ```
+
+   A `public_html/.htaccess` fájl a `public/.htaccess` másolásával kerül a helyére. A telepítési belépési pont a testvér `foodpro-app` mappát keresi; ha a Hostinger fiók ettől eltérő mappaszerkezetet ad, az `$applicationRoot` útvonalát a szerveren ehhez kell igazítani. A `storage` és `bootstrap/cache` könyvtár legyen írható a PHP folyamat számára, de ne kapjon `777` jogosultságot.
+5. Az üres MySQL-adatbázisba importáld a [kezdő SQL-t](database/food_pro_starter.sql) phpMyAdminból. Ez csak demóadatot tartalmaz; meglévő ügyféladatbázisba ne importáld. Ezután a `foodpro-app` könyvtárban egyszer futtasd:
+
+   ```sh
+   php artisan migrate --force
+   php artisan db:seed --class=FoodProDemoSeeder --force
+   touch storage/installed
+   php artisan foodpro:admin-password admin@foodpro.local
+   ```
+
+   A demófeltöltőt későbbi éles frissítéseknél ne futtasd újra. Az `APP_KEY` értéket és az adatbázist rendszeres mentés védje; az alkalmazáskulcs megváltoztatása a meglévő munkameneteket érvényteleníti. A jelenlegi alkalmazás azonnali (`sync`) sort és fájlos munkamenetet használ; az Artisan ütemezőjében nincs aktív feladat, ezért külön cron nem szükséges.
+6. Ellenőrizd a főoldalt, a CSS-t/képeket, az `/admin` bejelentkezést, egy tesztrendelést és az adminos képfeltöltést. A `https://foodpro.shop/composer.json` és `https://foodpro.shop/.env` cím nem szolgálhat ki fájlt. Az admin **Fizetések** lapján a Barion maradjon kikapcsolva, amíg a saját sandbox e-mail/POSKey és a HTTPS callback (`https://foodpro.shop/barion/callback`) nincs beállítva és kipróbálva. A tesztfizetés után éles vásárlókat csak valódi éttermi, jogi és levelezési adatokkal fogadj.
+
+Frissítéskor a `foodpro-app` mappában `git pull --ff-only`, majd szükség esetén `composer2 install --no-dev --prefer-dist --optimize-autoloader` és `php artisan migrate --force` után ismételd meg a két `cp` lépést. A frissítés előtt mentsd az adatbázist, a `.env` fájlt és a `public_html` feltöltéseit. A kódban több helyen közvetlen `env()` hívás van, ezért jelenleg ne futtasd a `php artisan config:cache` parancsot; az alkalmazás működését az aktív szerverkörnyezettel ellenőrizd.
 
 ## Éttermenkénti beállítás
 

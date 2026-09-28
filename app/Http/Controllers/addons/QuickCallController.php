@@ -14,14 +14,15 @@ class QuickCallController extends Controller
             $request->validate([
                 'quick_call_name' => 'required',
                 'quick_call_mobile' => 'required',
+                'quick_call_image' => 'nullable|image|mimes:jpeg,png,gif,webp|max:5120',
             ]);
     
             $data = Settings::first();
             // Upload Image
             if ($request->hasFile('quick_call_image')) {
                 $file = $request->file("quick_call_image");
-                $filename = 'quick-call-' . uniqid() . "." . $file->getClientOriginalExtension();
-                $file->move(env('ASSETSPATHURL').'admin-assets/images/about', $filename);
+                $filename = 'quick-call-' . uniqid() . "." . $file->extension();
+                $file->move(public_path('admin-assets/images/about'), $filename);
                 $data->quick_call_image = @$filename;
             }
     
@@ -34,7 +35,7 @@ class QuickCallController extends Controller
             $data->save();
             return redirect()->back()->with('success', trans('messages.success'));
         } catch (\Throwable $th) {
-            dd($th);
+            throw $th;
         }
     }
 }

@@ -29,8 +29,9 @@ class StoreReviewController extends Controller
     }
     public function store(Request $request)
     {
-        $image = 'store_review-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
-        $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/reviews', $image);
+        $request->validate(['image' => 'required|image|mimes:jpeg,png,gif,webp|max:5120']);
+        $image = 'store_review-' . uniqid() . '.' . $request->image->extension();
+        $request->image->move(public_path('admin-assets/images/reviews'), $image);
         $store_review = new Ratting();
         $store_review->user_id = Auth::user()->id;
         $store_review->name = $request->name;
@@ -51,13 +52,14 @@ class StoreReviewController extends Controller
     }
     public function update(Request $request)
     {
+        $request->validate(['image' => 'nullable|image|mimes:jpeg,png,gif,webp|max:5120']);
         $store_review = Ratting::find($request->id);
-        if ($request->file('image') != "") {
-            if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/reviews/' . $store_review->image)) {
-                unlink(env('ASSETSPATHURL') . 'admin-assets/images/reviews/' . $store_review->image);
+        if ($request->hasFile('image')) {
+            if ($store_review->image && file_exists(public_path('admin-assets/images/reviews/' . $store_review->image))) {
+                unlink(public_path('admin-assets/images/reviews/' . $store_review->image));
             }
-            $image = 'store_review-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
-            $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/reviews', $image);
+            $image = 'store_review-' . uniqid() . '.' . $request->image->extension();
+            $request->image->move(public_path('admin-assets/images/reviews'), $image);
             $store_review->image = $image;
             $store_review->save();
         }
@@ -70,8 +72,8 @@ class StoreReviewController extends Controller
     public function destroy(Request $request)
     {
         $store_review = Ratting::where('id', $request->id)->first();
-        if (file_exists(env('ASSETSPATHURL') . 'admin-assets/images/reviews/' . $store_review->image)) {
-            unlink(env('ASSETSPATHURL') . 'admin-assets/images/reviews/' . $store_review->image);
+        if ($store_review->image && file_exists(public_path('admin-assets/images/reviews/' . $store_review->image))) {
+            unlink(public_path('admin-assets/images/reviews/' . $store_review->image));
         }
         $store_review->delete();
         if ($store_review) {

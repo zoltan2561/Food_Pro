@@ -21,7 +21,7 @@ class LanguageController extends Controller
             'code'=> 'required',
             'layout'=> 'required',
             'name'=> 'required_with:code',
-            'image.*' => 'mimes:jpeg,png,jpg,webp',
+            'image' => 'nullable|image|mimes:jpeg,png,webp|max:5120',
         ],[
             "code.required"=>trans('messages.language_required'),
             "layout.required"=>trans('messages.layout_required'),
@@ -49,9 +49,9 @@ class LanguageController extends Controller
             $language->name = $request->name;
             $language->layout = $request->layout;
             $language->is_default = $default;
-            if ($request->has('image')) {
-                $flagimage = 'flag-' . uniqid() . "." .$request->file('image')->getClientOriginalExtension();
-                $request->file('image')->move(storage_path('app/public/admin-assets/images/language/'), $flagimage);
+            if ($request->hasFile('image')) {
+                $flagimage = 'flag-' . uniqid() . "." . $request->file('image')->extension();
+                $request->file('image')->move(public_path('admin-assets/images/language'), $flagimage);
                 $language->image = $flagimage;
             }
             $language->is_available = 1;

@@ -29,8 +29,9 @@ class BlogController extends Controller
     }
     public function store(Request $request)
     {
-        $image = 'blog-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
-        $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $image);
+        $request->validate(['image' => 'required|image|mimes:jpeg,png,gif,webp|max:5120']);
+        $image = 'blog-' . uniqid() . '.' . $request->image->extension();
+        $request->image->move(public_path('admin-assets/images/about'), $image);
         $blog = new Blogs;
         $blog->image = $image;
         $blog->title = $request->title;
@@ -50,13 +51,14 @@ class BlogController extends Controller
     }
     public function update(Request $request)
     {
+        $request->validate(['image' => 'nullable|image|mimes:jpeg,png,gif,webp|max:5120']);
         $blog = Blogs::find($request->id);
-        if ($request->file('image') != "") {
-            if (file_exists(storage_path() . "/app/public/admin-assets/images/about/" . $blog->image)) {
-                unlink(storage_path() . "/app/public/admin-assets/images/about/" . $blog->image);
+        if ($request->hasFile('image')) {
+            if ($blog->image && file_exists(public_path('admin-assets/images/about/' . $blog->image))) {
+                unlink(public_path('admin-assets/images/about/' . $blog->image));
             }
-            $image = 'blog-' . uniqid() . '.' . $request->image->getClientOriginalExtension();
-            $request->image->move(env('ASSETSPATHURL') . 'admin-assets/images/about/', $image);
+            $image = 'blog-' . uniqid() . '.' . $request->image->extension();
+            $request->image->move(public_path('admin-assets/images/about'), $image);
             $blog->image = $image;
             $blog->save();
         }
@@ -69,8 +71,8 @@ class BlogController extends Controller
     public function delete(Request $request)
     {
         $blog = Blogs::find($request->id);
-        if (file_exists(storage_path() . "/app/public/admin-assets/images/about/" . $blog->image)) {
-            unlink(storage_path() . "/app/public/admin-assets/images/about/" . $blog->image);
+        if ($blog->image && file_exists(public_path('admin-assets/images/about/' . $blog->image))) {
+            unlink(public_path('admin-assets/images/about/' . $blog->image));
         }
         if ($blog->delete()) {
             return 1;
