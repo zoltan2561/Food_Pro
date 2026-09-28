@@ -1,374 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ trans('labels.print') }}</title>
-    <link rel="stylesheet" href="{{ asset('admin-assets/assets/css/bootstrap/bootstrap.min.css') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ helper::image_path(@helper::appdata()->favicon) }}">
-    <style type="text/css">
-/* ===== 80 mm hőnyomtató – papírtakarékos ===== */
-html, body{
-  width:80mm; margin:0; padding:0; background:#fff;
-  font-family:system-ui,-apple-system,"Segoe UI",Arial,Helvetica,sans-serif;
-  font-size:18px; line-height:1.22; font-weight:700; color:#000;
-  -webkit-font-smoothing:none; text-align:center;
-}
-#printDiv{ margin:0 auto; }
-
-.resept{
-  width:100%; margin:0 auto; padding:1.2mm 0.8mm; background:#fff;
-  page-break-inside:avoid;     /* ne törje szét a blokkot */
-}
-/* ha több rendelés blokkot nyomtatsz egymás után, köztük finom elválasztó */
-.resept:not(:last-of-type)::after{
-  content:""; display:block; border-top:1px dashed #000; margin:2mm 0 0 0;
-}
-
-/* fejlécek */
-h5{ font-size:28px; margin:0; letter-spacing:1px; }
-.fs-8{ font-size:22px !important; }
-.fs-10, .txt-resept-font-size{ font-size:18px !important; }
-
-/* terméknév tipó */
-.product-text-size{
-  font-size:20px !important; line-height:1.22; color:#000 !important; font-weight:700;
-}
-
-/* extrák feketével, tömörebben */
-.product-text-size .text-muted,
-.product-text-size .text-muted span{
-  font-size:17px !important; font-weight:700 !important; color:#000 !important;
-  opacity:1 !important; white-space:nowrap; display:inline-block;
-}
-
-/* táblázat + elválasztó minden tétel után */
-.table{ width:100%; border-collapse:collapse; margin:4px 0; }
-.table th, .table td{ border:0; padding:3px 1px; text-align:center; vertical-align:middle; }
-.table td:nth-child(2){              /* terméknév oszlop */
-  white-space:normal; text-align:left; padding-left:10mm;   /* ~1 cm balra */
-}
-/* VÍZSZINTES VONAL a tételek között (csak a body-ban) */
-.table tbody tr{ border-bottom:1px dashed #000; }
-.table tbody tr:last-child{ border-bottom:1px dashed #000; } /* az utolsó tétel után is legyen */
-
-/* szaggatott blokk-elválasztók (összesítők köré) */
-.underline-3{
-  border-top:1px dashed #000; border-bottom:1px dashed #000;
-  padding:3px 0; margin:5px 0;
-}
-
-/* nyomtatási optimalizáció – ne húzzon plusz papírt */
-@media print{
-  @page{ margin:2mm; size:auto; }
-  html, body{ height:auto !important; -webkit-print-color-adjust:exact !important; }
-  #btnPrint{ display:none !important; }
-  #printDiv{ page-break-after:avoid !important; }
-  #printDiv *:last-child{ margin-bottom:0 !important; padding-bottom:0 !important; }
-}
-/* rendelés-blokk: keskenyebb szélső padding */
-.resept{
-  width:100%;
-  margin:0 auto;
-  padding:1mm 0.4mm;       /* 1.2mm 0.8mm → 1mm 0.4mm */
-  background:#fff;
-  page-break-inside:avoid;
-}
-
-/* cellák: kicsit keskenyebb vízszintes padding */
-.table th, .table td{
-  border:0;
-  padding:3px 0.5mm;       /* 3px 1px → 3px 0.5mm */
-  text-align:center;
-  vertical-align:middle;
-}
-
-/* terméknév oszlop: még balrább */
-.table td:nth-child(2){
-  white-space:normal;
-  text-align:left;
-  padding-left:6mm;        /* 10mm → 6mm (ha kell még: 5mm / 4mm) */
-}
-
-
-        
-    </style>
-
-
-</head>
-
-<body>
-    <div id="printDiv">
-        <div class="resept p-2">
 @php
-    // Nyomtatás ideje
-    $printedAt = \Carbon\Carbon::now()->timezone(config('app.timezone', 'Europe/Budapest'));
-
-    // Alapadatok
-    $transactionType = (int)($orderdata->transaction_type ?? 0);
-    $orderType = (int)($orderdata->order_type ?? 0);
+    $paper = request()->query('paper') === '58' ? '58' : '80';
+    $settings = helper::appdata();
+    $shopName = $settings->short_title ?: $settings->title ?: 'Étterem';
+    $printedAt = \Carbon\Carbon::now($settings->timezone ?: config('app.timezone'))->format('Y.m.d H:i');
+    $orderDate = \Carbon\Carbon::parse($orderdata->created_at)->format('Y.m.d H:i');
+    $orderType = (int) $orderdata->order_type;
+    $transactionType = (int) $orderdata->transaction_type;
     $paymentLabel = match ($transactionType) {
-        1 => 'KÉSZPÉNZ ÁTVÉTELKOR',
-        17 => 'KÁRTYA ÁTVÉTELKOR (TERMINÁL)',
-        16 => 'BARION ONLINE',
-        default => mb_strtoupper(helper::getpayment($transactionType)),
+        1 => 'Készpénz átvételkor',
+        17 => 'Kártya átvételkor',
+        16 => 'Barion online',
+        default => helper::getpayment($transactionType),
     };
+    $serviceLabel = match ($orderType) {
+        1 => trans('labels.delivery'),
+        2 => trans('labels.pickup'),
+        3 => trans('labels.pos'),
+        default => '',
+    };
+    $address = implode(', ', array_filter([
+        $orderdata->address,
+        $orderdata->landmark,
+        $orderdata->city,
+        $orderdata->state,
+        $orderdata->postal_code,
+        $orderdata->country,
+    ], fn ($part) => filled($part)));
+    $orderNote = collect([$orderdata->order_notes, $orderdata->instruction, $orderdata->notes])->first(fn ($note) => filled($note));
+    $subtotal = $ordersdetails->sum(fn ($item) =>
+        ((float) $item->item_price + (float) $item->addons_total_price + (float) $item->extras_total_price) * (int) $item->qty
+    );
+    $quantity = $ordersdetails->sum('qty');
+    $taxNames = explode('|', (string) $orderdata->tax_name);
+    $taxAmounts = explode('|', (string) $orderdata->tax_amount);
 @endphp
+<!doctype html>
+<html lang="hu">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ trans('labels.print') }} #{{ $orderdata->order_number }}</title>
+    <style>
+        @page { margin: 0; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; }
+        body { background: #ededed; color: #000; font: 12px/1.35 Arial, Helvetica, sans-serif; }
+        .preview-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 16px auto; padding: 0 12px; }
+        .preview-tools a, .preview-tools button { border: 1px solid #555; border-radius: 5px; background: #fff; color: #000; padding: 8px 12px; font: inherit; text-decoration: none; cursor: pointer; }
+        .preview-tools .active { background: #222; color: #fff; }
+        .receipt { width: 72mm; max-width: 100%; margin: 0 auto 20px; padding: 2mm; background: #fff; overflow-wrap: anywhere; }
+        .receipt--58 { width: 48mm; font-size: 11px; }
+        .receipt__head { text-align: center; }
+        .shop-name { margin: 0 0 5px; font-size: 17px; line-height: 1.15; font-weight: 800; text-transform: uppercase; }
+        .order-number { margin: 5px 0; font-size: 18px; line-height: 1.15; font-weight: 800; }
+        .service { margin: 4px 0; font-size: 14px; font-weight: 800; text-transform: uppercase; }
+        .rule { border: 0; border-top: 1px dashed #000; margin: 7px 0; }
+        .detail { display: flex; justify-content: space-between; gap: 5px; margin: 2px 0; }
+        .detail__label { flex: 0 1 auto; }
+        .detail__value { flex: 0 1 auto; text-align: right; font-weight: 700; }
+        .stacked { margin: 5px 0; }
+        .stacked__label { display: block; font-weight: 700; }
+        .stacked__value { display: block; white-space: pre-line; }
+        .payment { padding: 5px 0; text-align: center; font-size: 13px; font-weight: 800; text-transform: uppercase; }
+        .payment-status { display: block; font-size: 11px; }
+        .items-title { margin: 0 0 3px; font-size: 12px; text-transform: uppercase; }
+        .item { padding: 6px 0; border-top: 1px dashed #000; break-inside: avoid; page-break-inside: avoid; }
+        .item__head { display: flex; align-items: baseline; justify-content: space-between; gap: 5px; font-weight: 800; }
+        .item__name { flex: 1 1 auto; min-width: 0; }
+        .item__total { flex: 0 0 auto; white-space: nowrap; text-align: right; }
+        .item__meta { margin: 2px 0 0 18px; font-size: 11px; }
+        .item__modifier { display: block; }
+        .item__note { display: block; margin-top: 3px; white-space: pre-line; }
+        .totals { border-top: 1px dashed #000; padding-top: 4px; }
+        .totals .detail__value { white-space: nowrap; }
+        .grand-total { border-top: 2px solid #000; border-bottom: 2px solid #000; margin-top: 6px; padding: 6px 0; font-size: 15px; font-weight: 800; }
+        .grand-total .detail__label, .grand-total .detail__value { font-weight: 800; }
+        .receipt__foot { margin-top: 9px; text-align: center; font-size: 10px; }
+        .receipt--58 .shop-name { font-size: 15px; }
+        .receipt--58 .order-number { font-size: 16px; }
+        .receipt--58 .service, .receipt--58 .payment { font-size: 12px; }
+        .receipt--58 .grand-total { font-size: 13px; }
+        @media print {
+            html, body { width: auto; background: #fff; }
+            .preview-tools { display: none !important; }
+            .receipt { width: 72mm; max-width: none; margin: 0 auto; padding: 1mm 0; }
+            .receipt--58 { width: 48mm; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="preview-tools" aria-label="Nyomtatási beállítások">
+        <a href="{{ request()->fullUrlWithQuery(['paper' => '80']) }}" class="{{ $paper === '80' ? 'active' : '' }}">80 mm</a>
+        <a href="{{ request()->fullUrlWithQuery(['paper' => '58']) }}" class="{{ $paper === '58' ? 'active' : '' }}">58 mm</a>
+        <button type="button" onclick="window.print()">{{ trans('labels.print') }}</button>
+    </nav>
+    <main class="receipt {{ $paper === '58' ? 'receipt--58' : '' }}">
+        <header class="receipt__head">
+            <h1 class="shop-name">{{ $shopName }}</h1>
+            <p class="order-number">#{{ $orderdata->order_number }}</p>
+            @if (filled($serviceLabel))
+                <p class="service">{{ $serviceLabel }}</p>
+            @endif
+        </header>
 
-
-
-            <div class="address">
-                <h5 class="m-0 text-uppercase fs-8 text-center line-2 fw-600">{{ @helper::appdata()->short_title }}</h5>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center ">
-                    <small class=" text-uppercase fs-10 text-center text-dark fw-500 line-2">
-                        @if ($orderdata->order_type == 1)
-                            {{ @$orderdata->address . ' ' . @$orderdata->landmark . ',' . @$orderdata->city . ',' . @$orderdata->state . ',' . @$orderdata->country . ',' . @$orderdata->postal_code }}
-                        @elseif ($orderdata->order_type == 2)
-                            {{ trans('labels.pickup') }}
-                        @elseif ($orderdata->order_type == 3)
-                            {{ trans('labels.pos') }}
-                        @endif
-                        <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
-    <small class="text-uppercase fs-10 text-center text-dark fw-500 line-1">
-        {{ __('Fizetés') }}: {{ $paymentLabel }}
-    </small>
-</div>
-
-                    </small>
-                </div>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
-                    <p class=" m-0 fw-500 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ trans('labels.name') }} :</p>
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
-                        {{ @$orderdata->name }}
-                    </small>
-                </div>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
-                    <p class="fw-500 m-0 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ trans('labels.email') }} :</p>
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
-                        {{ @$orderdata->email }}
-                    </small>
-                </div>
-                <div class="col-12 mt-1 d-flex gap-1 align-items-center justify-content-center">
-                    <p class="fw-500 m-0 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ trans('labels.mobile') }} :</p>
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark  line-1">
-                        {{ @$orderdata->mobile }}
-                    </small>
-                </div>
-            </div>
-            <div class="total-billes-amount">
-                <div
-                    class="fw-500 d-flex gap-1 align-items-center justify-content-center mt-1 text-uppercase fs-10 text-center text-dark">
-                    {{ trans('labels.order_number') }} :
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark line-1">
-                        #{{ $orderdata->order_number }}
-                    </small>
-                </div>
-                <p
-                    class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
-                    {{ trans('labels.order_date') }} :
-                    <small class="fw-500 text-uppercase fs-10 text-center text-dark line-1">
-    {{ ($orderdata->created_at) }}
-</small>
-
-                </p>
-            </div>
-            <div class="total-billes-amount">
-                @if ($orderdata->delivery_date != '')
-                    <div
-                        class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark">
-                        {{ $orderdata->order_type == '1' ? trans('labels.delivery_date') : trans('labels.pickup_date') }}
-                        :
-                       <small class="fw-500 text-uppercase fs-10 text-center text-dark line-1">
-    {{($orderdata->created_at) }} 
-</small>
-
-
-                    </div>
-                @endif
-                @if ($orderdata->delivery_time != '')
-                    <p
-                        class="fw-500 d-flex gap-1 align-items-center justify-content-center m-0 text-uppercase fs-10 text-center text-dark line-1">
-                        {{ $orderdata->order_type == '1' ? trans('labels.delivery_time') : trans('labels.pickup_time') }}
-                        :
-                        <small
-                            class="fw-500 text-uppercase fs-10 text-center text-dark line-1">{{ helper::order_time($orderdata->delivery_time) }}
-                        </small>
-                    </p>
-                @endif
-            </div>
-            <table class="table table-borderless my-2 bg-transparent">
-               <thead class="underline-3">
-  <tr class="text-dark">
-    <th scope="col" class="product-text-size fw-bold">#</th>
-    <th scope="col" class="product-text-size fw-bold">{{ trans('labels.item') }}</th>
-    <th scope="col" class="product-text-size fw-bold text-center">db</th>
-    <th scope="col" class="product-text-size fw-bold text-center">{{ trans('labels.price') }}</th>
-  </tr>
-</thead>
-
-
-                <tbody>
-                    @php
-                        $order_total = 0;
-                        $qty = 0;
-                    @endphp
-                    @foreach ($ordersdetails as $key => $orders)
-                        @php
-                            $order_total +=
-                                ($orders['item_price'] +
-                                    $orders['addons_total_price'] +
-                                    $orders['extras_total_price']) *
-                                $orders['qty'];
-                            $qty += $orders['qty'];
-                        @endphp
-                       <tr class="align-middle">
-  <td class="py-2">
-    <p class="fw-500 text-dark line-1 m-0 product-text-size">{{ ++$key }}</p>
-  </td>
-
-  <td class="py-2">
-    <h6 class="m-0 fw-500 product-text-size">
-      {{ $orders->item_name }}<br>
-      @foreach ($orders->addon_selections as $name)
-        <span class="text-muted">+ {{ $name }}</span><br>
-      @endforeach
-      @foreach ($orders->extra_selections as $name)
-        <span class="text-muted">+ {{ $name }}</span><br>
-      @endforeach
-      @foreach ($orders->without_selections as $name)
-        <span class="text-dark">− {{ trans('labels.without_named', ['name' => $name]) }}</span><br>
-      @endforeach
-      @if (filled($orders->item_notes))
-        <span class="text-dark">{{ trans('labels.special_request') }}: {{ $orders->item_notes }}</span><br>
-      @endif
-    </h6>
-  </td>
-
-  <!-- 3. oszlop: DB (mennyiség) -->
-  <td class="py-2 text-end">
-    <p class="m-0 text-dark product-text-size">{{ $orders->qty }}</p>
-  </td>
-
-  <!-- 4. oszlop: ÁR (egységár + extrák összege) -->
-  <td class="py-2 text-end">
-    <p class="m-0 text-dark product-text-size">
-      {{ helper::currency_format($orders->item_price) }}
-      @if ($orders->addons_total_price != 0 || $orders->extras_total_price != 0)
-        <br><small class="text-muted">+
-          {{ helper::currency_format($orders->addons_total_price + $orders->extras_total_price) }}</small>
-      @endif
-    </p>
-  </td>
-</tr>
-
-
-                    @endforeach
-                </tbody>
-             <tfoot>
-  <tr class="underline-3">
-    <td class="py-2" colspan="2">
-      <h6 class="line-1 m-0 fw-600 product-text-size">{{ trans('labels.subtotal') }}</h6>
-    </td>
-    <td class="py-2 text-end">
-      <p class="m-0 text-dark product-text-size">{{ $qty }}</p>
-    </td>
-    <td class="py-2 text-end">
-      <p class="m-0 text-dark product-text-size">{{ helper::currency_format($order_total) }}</p>
-    </td>
-  </tr>
-</tfoot>
-
-            </table>
-            <div class="col-12 d-flex mb-2 justify-content-end">
-                <div class="col-7">
-                    <div class="col-12">
-                        <div class="text-dark">
-                            @if (!empty($orderdata->discount_amount))
-                                <div class="d-flex justify-content-between text-dark my-1">
-                                    <div class="">
-                                        <span class="txt-resept-font-size fw-500 text-uppercase line-1">
-                                            {{ trans('labels.discount') }}
-                                            {{ $orderdata->offer_code != '' ? '(' . $orderdata->offer_code . ')' : '' }}
-                                        </span>
-                                    </div>
-                                    <div class="">
-                                        <span class="txt-resept-font-size fw-500 text-uppercase text-end line-1">
-                                            {{ helper::currency_format($orderdata->discount_amount) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            @endif
-                            @php
-                                $tax = explode('|', $orderdata->tax_amount);
-                                $tax_name = explode('|', $orderdata->tax_name);
-                            @endphp
-                            @if ($orderdata->tax_amount != null && $orderdata->tax_name != null)
-                                @foreach ($tax as $key => $tax_value)
-                                    <div class="d-flex justify-content-between text-dark my-1">
-                                        <div class="">
-                                            <span
-                                                class="txt-resept-font-size fw-500 text-uppercase line-1">{{ $tax_name[$key] }}</span>
-                                        </div>
-                                        <div class="">
-                                            <span class="txt-resept-font-size fw-500 text-uppercase text-end line-1">
-                                                {{ helper::currency_format($tax_value) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            @endif
-                            @if ($orderdata->delivery_charge != 0)
-                                <div class="d-flex justify-content-between text-dark my-1">
-                                    <div class="">
-                                        <span class="txt-resept-font-size fw-500 text-uppercase line-1">
-                                            {{ trans('labels.delivery_charge') }}
-                                        </span>
-                                    </div>
-                                    <div class="">
-                                        <span class="txt-resept-font-size fw-500 text-uppercase line-1 text-end">
-                                            {{ helper::currency_format($orderdata->delivery_charge) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            @endif
-
-
-                                {{-- Megjegyzés / Customer note --}}
-                                @php
-                                    $order_note = $orderdata->instruction ?? $orderdata->notes ?? $orderdata->order_notes ?? '';
-                                @endphp
-                                @if(!empty($order_note))
-                                    <div class="underline-3 note-box">
-                                        <div class="note-title">{{ trans('labels.note') }}</div>
-                                        <div class="note-text" style="white-space: pre-line">{{ $order_note }}</div>
-                                    </div>
-                                @endif
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 d-flex justify-content-between underline-3 py-2">
-                <span class="fw-semibold product-text-size line-1">{{ trans('labels.grand_total') }}</span>
-                <span
-                    class="fw-semibold line-1 product-text-size">{{ helper::currency_format($orderdata->grand_total) }}</span>
-            </div>
-            <h2 class="my-2 fs-8 fw-600 text-center line-1">{{ trans('labels.thanks_for_order') }}</h2>
-            <div class="col-12 mt-2 d-flex justify-content-center">
-                <button type='button' id="btnPrint"
-                    class="rounded border-0 btn btn-primary text-light text-capitalize fs-8 px-3 py-2">{{ trans('labels.print') }}</button>
-            </div>
+        <hr class="rule">
+        <div class="detail"><span class="detail__label">{{ trans('labels.order_date') }}</span><span class="detail__value">{{ $orderDate }}</span></div>
+        @if (filled($orderdata->delivery_date))
+            <div class="detail"><span class="detail__label">{{ $orderType === 1 ? trans('labels.delivery_date') : trans('labels.pickup_date') }}</span><span class="detail__value">{{ \Carbon\Carbon::parse($orderdata->delivery_date)->format('Y.m.d') }}</span></div>
+        @endif
+        @if (filled($orderdata->delivery_time))
+            <div class="detail"><span class="detail__label">{{ $orderType === 1 ? trans('labels.delivery_time') : trans('labels.pickup_time') }}</span><span class="detail__value">{{ helper::order_time($orderdata->delivery_time) }}</span></div>
+        @endif
+        <div class="payment">
+            {{ $paymentLabel }}
+            @if ($transactionType === 17 && (int) $orderdata->payment_status !== 2)
+                <span class="payment-status">Terminálos fizetés várható</span>
+            @elseif ($transactionType === 16)
+                <span class="payment-status">{{ (int) $orderdata->payment_status === 2 ? 'Fizetve' : 'Fizetésre vár' }}</span>
+            @endif
         </div>
-    </div>
-    <script>
-        const $btnPrint = document.querySelector("#btnPrint");
-        $btnPrint.addEventListener("click", () => {
-            window.print();
-        });
-    </script>
+
+        <hr class="rule">
+        @if (filled($orderdata->name))
+            <div class="stacked"><span class="stacked__label">{{ trans('labels.name') }}</span><span class="stacked__value">{{ $orderdata->name }}</span></div>
+        @endif
+        @if (filled($orderdata->mobile))
+            <div class="stacked"><span class="stacked__label">{{ trans('labels.mobile') }}</span><span class="stacked__value">{{ $orderdata->mobile }}</span></div>
+        @endif
+        @if ($orderType === 1 && filled($address))
+            <div class="stacked"><span class="stacked__label">{{ trans('checkout.delivery_address') }}</span><span class="stacked__value">{{ $address }}</span></div>
+        @endif
+
+        <hr class="rule">
+        <h2 class="items-title">{{ trans('labels.item') }} ({{ $quantity }} db)</h2>
+        @foreach ($ordersdetails as $orders)
+            @php
+                $unitPrice = (float) $orders->item_price + (float) $orders->addons_total_price + (float) $orders->extras_total_price;
+                $lineTotal = $unitPrice * (int) $orders->qty;
+            @endphp
+            <article class="item">
+                <div class="item__head">
+                    <span class="item__name">{{ $orders->qty }} × {{ $orders->item_name }}</span>
+                    <span class="item__total">{{ helper::currency_format($lineTotal) }}</span>
+                </div>
+                <div class="item__meta">
+                    @foreach ($orders->addon_selections as $name)
+                        <span class="item__modifier">+ {{ $name }}</span>
+                    @endforeach
+                    @foreach ($orders->extra_selections as $name)
+                        <span class="item__modifier">+ {{ $name }}</span>
+                    @endforeach
+                    @foreach ($orders->without_selections as $name)
+                        <span class="item__modifier">− {{ trans('labels.without_named', ['name' => $name]) }}</span>
+                    @endforeach
+                    @if (filled($orders->item_notes))
+                        <span class="item__note"><strong>{{ trans('labels.special_request') }}:</strong> {{ $orders->item_notes }}</span>
+                    @endif
+                </div>
+            </article>
+        @endforeach
+
+        <div class="totals">
+            <div class="detail"><span class="detail__label">{{ trans('labels.subtotal') }}</span><span class="detail__value">{{ helper::currency_format($subtotal) }}</span></div>
+            @if ((float) $orderdata->discount_amount > 0)
+                <div class="detail"><span class="detail__label">{{ trans('labels.discount') }} @if (filled($orderdata->offer_code))({{ $orderdata->offer_code }})@endif</span><span class="detail__value">−{{ helper::currency_format($orderdata->discount_amount) }}</span></div>
+            @endif
+            @if (filled($orderdata->tax_name) && filled($orderdata->tax_amount))
+                @foreach ($taxAmounts as $index => $amount)
+                    @if (filled($taxNames[$index] ?? null))
+                        <div class="detail"><span class="detail__label">{{ $taxNames[$index] }}</span><span class="detail__value">{{ helper::currency_format($amount) }}</span></div>
+                    @endif
+                @endforeach
+            @endif
+            @if ((float) $orderdata->delivery_charge > 0)
+                <div class="detail"><span class="detail__label">{{ trans('labels.delivery_charge') }}</span><span class="detail__value">{{ helper::currency_format($orderdata->delivery_charge) }}</span></div>
+            @endif
+            <div class="detail grand-total"><span class="detail__label">{{ trans('labels.grand_total') }}</span><span class="detail__value">{{ helper::currency_format($orderdata->grand_total) }}</span></div>
+        </div>
+
+        @if (filled($orderNote))
+            <div class="stacked"><span class="stacked__label">{{ trans('labels.note') }}</span><span class="stacked__value">{{ $orderNote }}</span></div>
+        @endif
+        <footer class="receipt__foot">
+            <div>{{ trans('labels.thanks_for_order') }}</div>
+            <div>Nyomtatva: {{ $printedAt }}</div>
+        </footer>
+    </main>
 </body>
+</html>
