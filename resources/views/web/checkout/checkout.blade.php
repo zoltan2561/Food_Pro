@@ -187,7 +187,8 @@
                                 </div>
                             </div>
 
-                            <div class="card mb-3" id="addressdiv">
+                            @php $initialDelivery = $deliveryOn && $mode !== 3; @endphp
+                            <div class="card mb-3 {{ $initialDelivery ? '' : 'd-none' }}" id="addressdiv" aria-hidden="{{ $initialDelivery ? 'false' : 'true' }}">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center heading mb-2 border-bottom">
                                         <h5>{{ trans('checkout.delivery_address') }}</h5>
@@ -217,7 +218,7 @@
                                         {{-- Lakcím --}}
                                         <div class="col-12">
                                             <label for="new_address" class="form-label">{{ trans('labels.address') }} <span class="text-danger">*</span></label>
-                                             <textarea name="address" id="new_address" class="form-control" rows="2" placeholder="{{ trans('labels.address_details_placeholder') }}" required>{{ old('address') }}</textarea>
+                                             <textarea name="address" id="new_address" class="form-control" rows="2" placeholder="{{ trans('labels.address_details_placeholder') }}" @if ($initialDelivery) required @else disabled @endif>{{ old('address') }}</textarea>
                                         </div>
                                              {{-- The zone name can cover several towns, so the buyer enters the city. --}}
                                             <div class="col-md-6">
@@ -230,7 +231,7 @@
                                                        id="new_city"
                                                        placeholder="{{ trans('labels.city_placeholder') }}"
                                                        value="{{ old('city') }}"
-                                                       required
+                                                       @if ($initialDelivery) required @else disabled @endif
                                                        autocomplete="address-level2">
                                             </div>
 
@@ -241,14 +242,14 @@
                             </div>
 
 
-                            <div class="card mb-3" id="shipping_area">
+                            <div class="card mb-3 {{ $initialDelivery ? '' : 'd-none' }}" id="shipping_area" aria-hidden="{{ $initialDelivery ? 'false' : 'true' }}">
                                 <div class="card-body">
                                     <div class="heading mb-2 border-bottom">
                                         <h5>{{ trans('labels.shippingarea') }}</h5>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <select name="delivery_area" id="delivery_area" class="form-select">
+                                            <select name="delivery_area" id="delivery_area" class="form-select" aria-describedby="delivery_area_hint" @if ($initialDelivery) required @else disabled @endif>
                                                 <option value="" data-charge="0">{{ trans('labels.select') }}
                                                 </option>
                                                 @foreach ($shippingarea as $area)
@@ -257,6 +258,7 @@
                                                     </option>
                                                 @endforeach
                                             </select>
+                                            <small id="delivery_area_hint" class="form-text" aria-live="polite"></small>
                                         </div>
                                     </div>
                                 </div>
@@ -456,7 +458,7 @@
                                         </div>
                                     @endforeach
                                     @php $delivery_charge = 0; @endphp
-                                    <div class="row justify-content-between align-items-center" id="delivery_charge_row">
+                                    <div class="row justify-content-between align-items-center {{ $initialDelivery ? '' : 'd-none' }}" id="delivery_charge_row">
                                         <div class="col-auto"><span>{{ trans('labels.delivery_charge') }}</span>
                                         </div>
                                         <div class="col-auto">
@@ -756,6 +758,9 @@
             const totalLabel = document.getElementById('total_amount');
             const deliveryLabel = document.getElementById('delivery_amount');
             const hiddenOrderType = document.getElementById('order_type');
+            const cityInput = document.getElementById('new_city');
+            const addressInput = document.getElementById('new_address');
+            const areaHint = document.getElementById('delivery_area_hint');
 
             function formatMoney(value) {
                 const fixed = Math.max(0, value).toFixed(decimals).split('.');
@@ -780,37 +785,85 @@
                 if (payTotal) payTotal.textContent = formatMoney(total);
             }
 
-            area?.addEventListener('change', updateTotals);
-            document.querySelectorAll('input[name="order_type"]').forEach(input => {
-                input.addEventListener('change', updateTotals);
-            });
-            updateTotals();
-        })();
-    </script>
-
-
-    <script>
-        (function(){
-            var deliveryOn = {{ $deliveryOn ? 'true' : 'false' }};
-            var hidden = document.getElementById('order_type');
-
-            function setHidden(val){ if(hidden){ hidden.value = val; } }
-
-            // Alapállapot
-            if (!deliveryOn) {
-                setHidden(2); // Kiszállítás tiltva → elvitel
-            } else {
-                // ha van checked radio, vegyük onnan
-                var checked = document.querySelector('input[name="order_type"]:checked');
-                setHidden(checked ? checked.value : 1);
+            function normalizePlace(value) {
+                return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase().replace(/^\d{4}\s+/, '').replace(/[^a-z0-9]+/g, ' ').trim();
             }
 
-            // Változás figyelése
-            document.querySelectorAll('input[name="order_type"]').forEach(function(el){
-                el.addEventListener('change', function(e){
-                    setHidden(e.target.value);
+            function matchAreaToCity() {
+                if (!area || !cityInput) return;
+                const city = normalizePlace(cityInput.value);
+                const matches = city ? [...area.options].filter(option => {
+                    if (!option.value) return false;
+                    const zone = normalizePlace(option.textContent);
+                    return zone === city || zone.startsWith(city + ' ');
+                }) : [];
+                if (matches.length === 1) {
+                    area.value = matches[0].value;
+                    areaHint.textContent = 'A kiszállítási területet a település alapján kiválasztottuk.';
+                    areaHint.classList.remove('text-danger');
+                } else {
+                    area.value = '';
+                    areaHint.textContent = city ? 'Nem találtunk egyértelmű területet; válassz a listából.' : '';
+                    areaHint.classList.toggle('text-danger', Boolean(city));
+                }
+                updateTotals();
+            }
+
+            function fillCityFromAddress() {
+                if (!addressInput || !cityInput || !area) return;
+                if (cityInput.value.trim() && cityInput.dataset.fromAddress !== '1') return;
+                const parts = addressInput.value.split(',').map(normalizePlace).filter(Boolean);
+                const options = [...area.options].filter(option => option.value);
+                const matches = options.filter(option => {
+                    const town = normalizePlace(option.textContent).replace(/\s+[0-9]+\s*ft.*$/, '');
+                    return parts[0] === town || parts[parts.length - 1] === town;
                 });
+                if (matches.length === 1) {
+                    cityInput.value = matches[0].textContent.trim().replace(/\s+[-–]\s+.*$/, '');
+                    cityInput.dataset.fromAddress = '1';
+                } else if (cityInput.dataset.fromAddress === '1') {
+                    cityInput.value = '';
+                }
+                matchAreaToCity();
+            }
+
+            function syncFulfillment() {
+                const selectedType = document.querySelector('input[name="order_type"]:checked')?.value || '1';
+                if (hiddenOrderType) hiddenOrderType.value = selectedType;
+                const delivery = selectedType === '1';
+                for (const id of ['addressdiv', 'shipping_area']) {
+                    const card = document.getElementById(id);
+                    card?.classList.toggle('d-none', !delivery);
+                    card?.setAttribute('aria-hidden', String(!delivery));
+                    card?.querySelectorAll('input, textarea, select').forEach(input => { input.disabled = !delivery; });
+                }
+                for (const input of [document.getElementById('new_address'), cityInput, area]) {
+                    if (input) input.required = delivery;
+                }
+                document.getElementById('delivery_charge_row')?.classList.toggle('d-none', !delivery);
+                updateTotals();
+            }
+
+            cityInput?.addEventListener('input', () => {
+                cityInput.dataset.fromAddress = '';
+                matchAreaToCity();
             });
+            cityInput?.addEventListener('change', matchAreaToCity);
+            addressInput?.addEventListener('change', fillCityFromAddress);
+            addressInput?.addEventListener('blur', fillCityFromAddress);
+            area?.addEventListener('change', () => {
+                if (areaHint) {
+                    areaHint.textContent = area.value ? 'Kiszállítási terület kiválasztva.' : '';
+                    areaHint.classList.remove('text-danger');
+                }
+                updateTotals();
+            });
+            document.querySelectorAll('input[name="order_type"]').forEach(input =>
+                input.addEventListener('change', syncFulfillment));
+            matchAreaToCity();
+            fillCityFromAddress();
+            syncFulfillment();
         })();
     </script>
 
@@ -997,12 +1050,13 @@
             }
 
             async function startBarion(){
+                const isDelivery = el('order_type')?.value === '1';
                 const payload = {
                     grand_total:     val('grand_total'),
                     tax:             val('tax'),
                     tax_name:        val('tax_name'),
                     order_type:      el('order_type')?.value ?? '',
-                    delivery_area:   el('delivery_area')?.value ?? '',
+                    delivery_area:   isDelivery ? (el('delivery_area')?.value ?? '') : '',
                     delivery_charge: val('delivery_charge'),
                     buynow:          val('buynow'),
                     terms:           el('terms')?.checked ? '1' : '0',
@@ -1012,12 +1066,12 @@
                     first_name: el('first_name')?.value ?? '',
                     last_name:  el('last_name')?.value ?? '',
 
-                    address:       el('new_address')?.value ?? '',
-                    city:          el('new_city')?.value ?? '',
-                    landmark:      el('landmark')?.value ?? '',
-                    pincode:       el('pincode')?.value ?? '',
-                    country:       el('country')?.value ?? '',
-                    state:         el('state')?.value ?? '',
+                    address:       isDelivery ? (el('new_address')?.value ?? '') : '',
+                    city:          isDelivery ? (el('new_city')?.value ?? '') : '',
+                    landmark:      isDelivery ? (el('landmark')?.value ?? '') : '',
+                    pincode:       isDelivery ? (el('pincode')?.value ?? '') : '',
+                    country:       isDelivery ? (el('country')?.value ?? '') : '',
+                    state:         isDelivery ? (el('state')?.value ?? '') : '',
                     order_notes:   el('order_notes')?.value ?? '',
                     schedule_mode: el('schedule_later')?.checked ? 'scheduled' : 'now',
                     delivery_date: document.querySelector('.delivery_pickup_date')?.value ?? '',

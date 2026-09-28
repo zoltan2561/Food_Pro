@@ -93,7 +93,8 @@ class BarionController extends Controller
             $orderType = (int) $request->input('order_type');
             $deliveryCharge = 0.0;
             if ($orderType === 1) {
-                $area = Shippingarea::findOrFail((int) $request->input('delivery_area'));
+                $area = Shippingarea::matchingCity((string) $request->input('city'))
+                    ?: Shippingarea::findOrFail((int) $request->input('delivery_area'));
                 if ($cartAmount < (float) $area->min_order) {
                     return response()->json(['ok' => false, 'msg' => 'A kiválasztott zónához nem érte el a minimális rendelési összeget.'], 422);
                 }

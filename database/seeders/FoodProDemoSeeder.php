@@ -83,9 +83,18 @@ class FoodProDemoSeeder extends Seeder
                 'footer_description' => 'Pizzák, burgerek és friss fogások egy helyen. Bemutató étterem.',
                 'copyright' => '© Food Pro Demo – bemutató oldal',
                 'email' => 'demo@foodpro.local', 'mobile' => '+36 30 000 0000',
-                'address' => 'Győr, Minta utca 12. (bemutató cím)',
+                'address' => 'Vásárosnamény, Minta utca 12. (bemutató cím)',
                 'notification_tune' => 'demo-notification.mp3',
                 'updated_at' => $now,
+            ]);
+
+            DB::table('shipping_area')->updateOrInsert(['id' => 41], [
+                'name' => 'Vásárosnamény', 'delivery_charge' => '490',
+                'min_order' => 0, 'reorder_id' => 1, 'updated_at' => $now,
+            ]);
+            DB::table('shipping_area')->updateOrInsert(['name' => 'Vitka'], [
+                'delivery_charge' => '790', 'min_order' => 0,
+                'reorder_id' => 2, 'updated_at' => $now,
             ]);
 
             $faqs = [
@@ -104,7 +113,7 @@ class FoodProDemoSeeder extends Seeder
             }
 
             $notice = '<p><strong>Bemutató mintaszöveg.</strong> Éles használat előtt az üzemeltető adataival és jogilag ellenőrzött dokumentummal kell felváltani.</p>';
-            $operator = '<p>Üzemeltető: Példa Tulaj (mintaadat)<br>Éttermének neve: Food Pro Demo<br>Cím: 9021 Győr, Minta utca 12. (mintaadat)<br>E-mail: demo@foodpro.local<br>Telefon: +36 30 000 0000 (mintaadat)<br>Adószám, cégjegyzékszám, nyilvántartási szám: megadandó az éles üzemeltető által.</p>';
+            $operator = '<p>Üzemeltető: Példa Tulaj (mintaadat)<br>Éttermének neve: Food Pro Demo<br>Cím: 4800 Vásárosnamény, Minta utca 12. (mintaadat)<br>E-mail: demo@foodpro.local<br>Telefon: +36 30 000 0000 (mintaadat)<br>Adószám, cégjegyzékszám, nyilvántartási szám: megadandó az éles üzemeltető által.</p>';
             $pages = [
                 ['about', 'about_content', $notice . '<h2>Üdv a Food Pro Demo étteremben!</h2><p>Ez a bemutató oldal egy testreszabható éttermi rendelési rendszer működését mutatja meg. A pizza, burger, saláta és desszert csak mintakínálat. A szövegek, képek, kategóriák és árak az adminban szerkeszthetők.</p>' . $operator],
                 ['terms', 'termscondition_content', $notice . '<h2>Általános szerződési feltételek – minta</h2>' . $operator . '<h3>Rendelés</h3><p>A vásárló a kosárban ellenőrzi a tételeket, feltéteket, díjakat és elérhetőségeit. A rendelés véglegesítése után az étterem visszaigazolása és a tényleges teljesítés feltételei az üzemeltető saját szabályzata szerint érvényesek.</p><h3>Árak és teljesítés</h3><p>A pénztár a termékek árát, az alkalmazandó díjakat és a végösszeget a leadás előtt mutatja. Az átvétel és kiszállítás elérhetősége, időpontja, fizetési módja és területe az admin beállításaitól függ.</p><h3>Kapcsolat és panasz</h3><p>A rendelés módosításával, lemondásával vagy panasszal az étterem megadott elérhetőségein lehet jelentkezni. Élesítés előtt az ügyfélszolgálati és jogszabályi tájékoztatást ki kell egészíteni.</p>'],

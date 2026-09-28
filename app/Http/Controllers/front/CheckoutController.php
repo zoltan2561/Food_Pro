@@ -310,7 +310,8 @@ class CheckoutController extends Controller
             $delivery_date = $timing['date'];
             $delivery_time = $timing['time'];
             if ((int) $order_type === 1) {
-                $area = Shippingarea::find((int) $request->input('delivery_area'));
+                $area = Shippingarea::matchingCity($city)
+                    ?: Shippingarea::find((int) $request->input('delivery_area'));
                 if (!$area) {
                     return response()->json(['status' => 0, 'message' => 'Válassz kiszállítási területet.'], 200);
                 }

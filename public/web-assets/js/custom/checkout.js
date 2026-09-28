@@ -31,15 +31,18 @@
             const key = ({ new_address: 'address', new_city: 'city', deliverytime: 'delivery_time' })[input.id] || input.name || input.id;
             body.set(key, input.value);
         });
+        if (orderType !== '1') {
+            for (const key of ['address', 'city', 'delivery_area']) body.delete(key);
+        }
         body.set('name', [first.value.trim(), last.value.trim()].join(' '));
         body.set('transaction_type', payment.value);
         body.set('schedule_mode', scheduleMode);
         body.set('terms', document.getElementById('terms')?.checked ? '1' : '0');
-        body.set('address_type', document.getElementById('address_type')?.value || '');
-        body.set('pincode', document.getElementById('pincode')?.value || '');
-        body.set('landmark', document.getElementById('landmark')?.value || '');
-        body.set('country', document.getElementById('country')?.value || '');
-        body.set('state', document.getElementById('state')?.value || '');
+        body.set('address_type', orderType === '1' ? (document.getElementById('address_type')?.value || '') : '');
+        body.set('pincode', orderType === '1' ? (document.getElementById('pincode')?.value || '') : '');
+        body.set('landmark', orderType === '1' ? (document.getElementById('landmark')?.value || '') : '');
+        body.set('country', orderType === '1' ? (document.getElementById('country')?.value || '') : '');
+        body.set('state', orderType === '1' ? (document.getElementById('state')?.value || '') : '');
         if (payment.dataset.orderNotes) body.set('order_notes', [body.get('order_notes'), payment.dataset.orderNotes].filter(Boolean).join(' · '));
         button.disabled = true;
         try {

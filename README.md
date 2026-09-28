@@ -28,6 +28,8 @@ A Barion tesztmódra van előkészítve, és vásárlók számára alapból ki v
 
 A pénztár a termékeket, adókat és a kiválasztott kiszállítási díjat a szerveren számolja. A vásárló választhatja a **Most kérem** módot, amelyhez nem kell időpontot megadni, ha az étterem nyitva van, vagy a **Későbbre kérem** módot az adminban tárolt nyitvatartásból képzett szabad idősávval. Az időzítést a szerver ellenőrzi. A vásárlói fiók elérhető, de a pénztár vendégként is használható. A kezdő SQL személyes és rendelési adatok nélkül importálható.
 
+Elvitel választásakor a szállítási cím és terület eltűnik, és a kiszállítási díj nulla. Kiszállításnál a település neve alapján a terület automatikusan kiválasztódik; a „Vásárosnamény, Minta utca 12.” formában megadott címből a település mező is kitöltődik. Ha nincs egyértelmű egyezés, a vásárló kézzel választ. Az adminban a terület neve kezdődjön a település nevével (például „Vásárosnamény” vagy „Vásárosnamény - belváros”). Több azonos településű területnél a vásárló választása szükséges. A demó Vásárosnamény és Vitka mintaterületet tartalmaz, saját árakkal.
+
 ## Átadás előtti ellenőrzés
 
 - Add meg az étterem valódi adatait, árait, zónáit, nyitvatartását és jogi dokumentumait.
