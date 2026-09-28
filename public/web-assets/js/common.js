@@ -37,6 +37,20 @@
     };
 
     window.getaddons = function (id) {
+        let groupRules = [];
+        try { groupRules = JSON.parse(document.getElementById('addongroup_' + id)?.dataset.addongroup_val || '[]'); } catch (_) { /* no groups */ }
+        document.querySelectorAll('[id^="item_addons_group_' + id + '_"].foodpro-addon-invalid').forEach(group => {
+            const rule = groupRules.find(rule => group.id === 'item_addons_group_' + id + '_' + rule.id);
+            const selectedCount = group.querySelectorAll('input[type="checkbox"]:checked:not([value=""]), input[type="radio"]:checked:not([value=""])').length;
+            const minimum = Number(rule?.selection_type) === 1 ? (Number(rule?.selection_count) === 1 ? 1 : Math.max(1, Number(rule?.min_count) || 1)) : 0;
+            const maximum = Number(rule?.selection_count) === 1 ? 1 : Math.max(1, Number(rule?.max_count) || 1);
+            if (rule && selectedCount >= minimum && selectedCount <= maximum) {
+                group.classList.remove('foodpro-addon-invalid');
+                group.querySelectorAll('[aria-invalid="true"]').forEach(input => input.removeAttribute('aria-invalid'));
+                const message = group.querySelector('.foodpro-addon-error');
+                if (message) message.textContent = '';
+            }
+        });
         const item = document.querySelector('.subtotal_' + id);
         const base = Number(value('item_price_' + id)) || 0;
         const extra = [...document.querySelectorAll('.addons_chk_' + id + ':checked, .extras_chk_' + id + ':checked')]
@@ -54,14 +68,35 @@
         const groups = document.getElementById('addongroup_' + id);
         let rules = [];
         try { rules = JSON.parse(groups?.dataset.addongroup_val || '[]'); } catch (_) { /* no groups */ }
+        document.querySelectorAll('[id^="item_addons_group_' + id + '_"]').forEach(group => {
+            group.classList.remove('foodpro-addon-invalid');
+            group.querySelectorAll('[aria-invalid="true"]').forEach(input => input.removeAttribute('aria-invalid'));
+            const message = group.querySelector('.foodpro-addon-error');
+            if (message) message.textContent = '';
+        });
         for (const group of rules) {
-            if (!document.getElementById('item_addons_group_' + id + '_' + group.id)) continue;
+            const groupElement = document.getElementById('item_addons_group_' + id + '_' + group.id);
+            if (!groupElement) continue;
             const selected = document.querySelectorAll('[name="addons_id_' + group.id + '_' + id + '"]:checked:not([value=""])');
             const required = Number(group.selection_type) === 1;
             const minimum = required ? (Number(group.selection_count) === 1 ? 1 : Math.max(1, Number(group.min_count) || 1)) : 0;
             const maximum = Number(group.selection_count) === 1 ? 1 : Math.max(1, Number(group.max_count) || 1);
             if (selected.length < minimum || selected.length > maximum) {
-                notice('Válassz megfelelő számú feltétet: ' + group.name);
+                groupElement.classList.add('foodpro-addon-invalid');
+                groupElement.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => input.setAttribute('aria-invalid', 'true'));
+                let message = groupElement.querySelector('.foodpro-addon-error');
+                if (!message) {
+                    message = document.createElement('p');
+                    message.className = 'foodpro-addon-error';
+                    message.setAttribute('role', 'alert');
+                    groupElement.appendChild(message);
+                }
+                message.textContent = selected.length < minimum
+                    ? 'Kötelező választás: legalább ' + minimum + ' opciót jelölj meg.'
+                    : 'Legfeljebb ' + maximum + ' opció választható.';
+                groupElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                groupElement.querySelector('input[type="radio"], input[type="checkbox"]')?.focus({ preventScroll: true });
+                notice(group.name + ': ' + message.textContent);
                 return;
             }
         }

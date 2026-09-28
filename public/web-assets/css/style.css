@@ -250,6 +250,9 @@ h1, h2, h3, h4, h5 { color: var(--foodpro-ink); letter-spacing: -.025em; }
 .foodpro-choice:hover { border-color: var(--foodpro-green); }
 .foodpro-choice:has(input:checked) { border-color: var(--foodpro-green); background: #f0f8f1; box-shadow: 0 4px 14px rgba(23,107,91,.08); }
 .foodpro-choice:has(input:focus-visible) { outline: 3px solid var(--foodpro-gold); outline-offset: 2px; }
+.item-addons-list.foodpro-addon-invalid { border: 2px solid #be2835 !important; border-radius: 14px; background: #fff3f4; padding: 14px !important; box-shadow: 0 0 0 4px rgba(190,40,53,.12); }
+.foodpro-addon-invalid > h5, .foodpro-addon-invalid .addon_group_color { color: #a61f2b !important; }
+.foodpro-addon-error { margin: 12px 0 0; color: #a61f2b; font-size: .9rem; font-weight: 700; }
 .foodpro-selection-summary { gap: 16px; padding: 14px 16px; border-radius: 12px; background: #edf5ee; color: var(--foodpro-ink); font-weight: 600; }
 .foodpro-selection-summary strong { color: var(--foodpro-green-dark); font-size: 1.2rem; white-space: nowrap; }
 @media (max-width: 575.98px) { .foodpro-selection-summary { align-items: flex-start !important; flex-direction: column; gap: 4px; } }

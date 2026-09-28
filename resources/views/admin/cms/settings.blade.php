@@ -544,8 +544,8 @@
                                                             <label class="col-form-label"
                                                                 for="">{{ trans('labels.noti_tone') }}
                                                                 (mp3 only) </label>
-                                                            <input type="file" class="form-control" name="noti_tune"
-                                                                id="noti_tune" accept="audio/mpeg">
+                                                            <input type="file" class="form-control @error('noti_tune') is-invalid @enderror" name="noti_tune"
+                                                                id="noti_tune" accept=".mp3,audio/mpeg" required>
                                                             @error('noti_tune')
                                                                 <span class="text-danger">{{ $message }}</span><br>
                                                             @enderror
@@ -558,7 +558,7 @@
                                                                 <audio controls>
                                                                     <source
                                                                         src="{{ asset('admin-assets/notification/' . $getsettings->notification_tune) }}"
-                                                                        type="audio/mp3">
+                                                                        type="audio/mpeg">
                                                                     Your Browser Does Not Support The Audio Element.
                                                                 </audio>
                                                             @endif
@@ -569,7 +569,7 @@
                                                     <div
                                                         class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">
                                                         <button class="btn btn-primary"
-                                                            @if (env('Environment') == 'sendbox') type="button" onclick="myFunction()" @else type="submit" name="notification_update" value="1" @endif>{{ trans('labels.save') }}</button>
+                                                            type="submit" name="notification_update" value="1">{{ trans('labels.save') }}</button>
                                                     </div>
                                                 </div>
                                             </form>

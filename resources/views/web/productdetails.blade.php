@@ -268,7 +268,7 @@
                                 </div>
                             @endif
                             <div class="item-details mt-3">
-                                <label class="form-label fw-600 fs-7" for="item_notes_{{ $getitemdata['id'] }}">{{ trans('labels.special_request') }}</label>
+                                <label class="form-label fw-600 fs-7" for="item_notes_{{ $getitemdata['id'] }}">{{ trans('labels.special_request') }} <span class="fw-normal text-muted">({{ trans('labels.optional') }})</span></label>
                                 <textarea class="form-control" id="item_notes_{{ $getitemdata['id'] }}" maxlength="250" rows="2"
                                     placeholder="{{ trans('labels.special_request_o') }}"></textarea>
                             </div>

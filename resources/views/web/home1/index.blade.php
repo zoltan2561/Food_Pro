@@ -142,7 +142,7 @@
                                     <div class="text-center pt-3 category-text">
                                         <p class="fs-6 fw-500 mb-0">{{ $categorydata->category_name }}</p>
                                         <p class="fs-7 fw-400 text-primary mb-0">
-                                            {{ $categorydata->item_info->count() }} {{ trans('labels.item') }}
+                                            {{ $categorydata->item_info->where('item_status', 1)->count() }} {{ trans('labels.item') }}
                                         </p>
                                     </div>
                                 </div>
@@ -651,8 +651,8 @@
                         </div>
                     </div>
                     <div class="col-lg-6 col-12 d-md-block d-none">
-                        <img src="{{ url('storage/app/public/prof.jpg') }}"
-                            class="w-100 object-fit-cover rounded-4" alt="">
+                        <img src="{{ asset('foodpro-assets/foodpro-salad.png') }}"
+                            class="w-100 object-fit-cover rounded-4" alt="Friss étel a Food Pro bemutatóban">
                     </div>
                 </div>
             </div>

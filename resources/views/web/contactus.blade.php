@@ -87,7 +87,7 @@
                                 <div class="col-xl-12 col-lg-6 col-sm-6 my-1">
                                     <div class="card border-0 rounded-3 p-3 h-100 row">
                                         <h5><i class="fa-solid fa-clock {{ session()->get('direction') == '2' ? 'ps-2' : 'pe-2' }}"></i>{{ trans('labels.working_hours') }}</h5>
-                                        <h6 class="text-muted">{{ ucfirst($timedata->day) }}
+                                        <h6 class="text-muted">{{ \Carbon\Carbon::parse($timedata->day)->locale(app()->getLocale())->translatedFormat('l') }}
                                             <span class="cursor-pointer" data-bs-toggle="modal"
                                                 data-bs-target="#modal_working_hours">
                                                 <i class="fa-solid fa-circle-info fs-6 text-dark"></i>
@@ -97,10 +97,12 @@
                                             <span
                                                 class="badge bg-danger fs-6 col-xl-4 col-12">{{ trans('labels.closing_time') }}</span>
                                         @else
-                                            <p>{{ $timedata->open_time }} <b>{{ trans('labels.to') }}</b>
-                                                {{ $timedata->break_start }}</p>
-                                            <p>{{ $timedata->break_end }} <b>{{ trans('labels.to') }}</b>
-                                                {{ $timedata->close_time }}</p>
+                                            @if ($timedata->break_start && $timedata->break_end)
+                                                <p>{{ $timedata->open_time }} <b>{{ trans('labels.to') }}</b> {{ $timedata->break_start }}</p>
+                                                <p>{{ $timedata->break_end }} <b>{{ trans('labels.to') }}</b> {{ $timedata->close_time }}</p>
+                                            @else
+                                                <p>{{ $timedata->open_time }} <b>{{ trans('labels.to') }}</b> {{ $timedata->close_time }}</p>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>

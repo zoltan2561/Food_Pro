@@ -10,6 +10,8 @@ use App\Models\Pixcel;
 use App\Models\Settings;
 use App\Models\SocialLinks;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use App\Helpers\helper;
 use App\Support\SiteNavigation;
 use Illuminate\Validation\Rule;
@@ -206,24 +208,18 @@ class SettingController extends Controller
 
     private function updateNotificationSettings($setting, $request)
     {
-        $validator = Validator::make($request->all(), [
-            'noti_tune' => 'nullable|mimes:mp3',
+        $request->validate([
+            'noti_tune' => 'required|file|mimes:mp3|max:5120',
         ], [
-            "noti_tune.required" => trans('messages.noti_tune_required'),
-            "noti_tune.mimes" => trans('messages.noti_tune_must_mp3'),
+            'noti_tune.required' => trans('messages.noti_tune_required'),
+            'noti_tune.mimes' => trans('messages.noti_tune_must_mp3'),
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
         if ($request->hasFile('noti_tune')) {
-            $setting->notification_tune = $this->handleFileUpload(
-                $request->file('noti_tune'),
-                'notification',
-                'admin-assets/notification/',
-                $setting->notification_tune
-            );
+            File::ensureDirectoryExists(public_path('admin-assets/notification'));
+            $filename = 'notification-' . Str::uuid() . '.mp3';
+            $request->file('noti_tune')->move(public_path('admin-assets/notification'), $filename);
+            $setting->notification_tune = $filename;
             $setting->save();
         }
     }

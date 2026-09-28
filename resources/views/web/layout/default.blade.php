@@ -182,14 +182,16 @@
                 <div class="modal-body">
                     <ul class="list-group list-group-flush">
                         @foreach (helper::gettime() as $time)
-                            <li class="list-group-item d-flex justify-content-between fs-7"> {{ ucfirst($time->day) }}
+                            <li class="list-group-item d-flex justify-content-between fs-7"> {{ \Carbon\Carbon::parse($time->day)->locale(app()->getLocale())->translatedFormat('l') }}
                                 @if ($time->always_close == 1)
                                     <span class="text-danger fs-6">{{ trans('labels.closing_time') }}</span>
                                 @else
-                                    <span>{{ $time->open_time }} <b>{{ trans('labels.to') }}</b>
-                                        {{ $time->break_start }}
-                                        <br>
-                                        {{ $time->break_end }} <b>{{ trans('labels.to') }}</b>
+                                    <span>
+                                        {{ $time->open_time }} <b>{{ trans('labels.to') }}</b>
+                                        @if ($time->break_start && $time->break_end)
+                                            {{ $time->break_start }}<br>
+                                            {{ $time->break_end }} <b>{{ trans('labels.to') }}</b>
+                                        @endif
                                         {{ $time->close_time }}
                                     </span>
                                 @endif

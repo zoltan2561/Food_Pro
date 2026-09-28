@@ -92,7 +92,8 @@ class CartController extends Controller
             $addonIds = $parseIds($request->input('addons_id'));
             $extraIds = $parseIds($request->input('extras_id'));
             $withoutGroupIds = $parseIds($request->input('without_groups'));
-            $itemNotes = $request->input('item_notes', '');
+            // ConvertEmptyStringsToNull turns an empty optional textarea into null.
+            $itemNotes = $request->input('item_notes') ?? '';
             if (!is_string($itemNotes) || mb_strlen(trim($itemNotes)) > 250) {
                 return response()->json(['status' => 0, 'message' => 'A termékhez írt kérés legfeljebb 250 karakter lehet.'], 422);
             }
