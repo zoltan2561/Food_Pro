@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ trans('labels.print') }}</title>
-    <link rel="stylesheet" href="{{ url('storage/app/public/admin-assets/assets/css/bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin-assets/assets/css/bootstrap/bootstrap.min.css') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ helper::image_path(@helper::appdata()->favicon) }}">
     <style type="text/css">
 /* ===== 80 mm hőnyomtató – papírtakarékos ===== */
@@ -245,19 +245,17 @@ h5{ font-size:28px; margin:0; letter-spacing:1px; }
   <td class="py-2">
     <h6 class="m-0 fw-500 product-text-size">
       {{ $orders->item_name }}<br>
-      @php
-          $addons_name = explode('| ', $orders->addons_name);
-          $extras_name = explode('| ', $orders->extras_name);
-      @endphp
-      @if ($orders->addons_id != '')
-        @foreach ($addons_name as $key => $val)
-          <span class="text-muted">{{ trim($addons_name[$key]) }}</span><br>
-        @endforeach
-      @endif
-      @if ($orders->extras_id != '')
-        @foreach ($extras_name as $key => $val)
-          <span class="text-muted">{{ trim($extras_name[$key]) }}</span><br>
-        @endforeach
+      @foreach ($orders->addon_selections as $name)
+        <span class="text-muted">+ {{ $name }}</span><br>
+      @endforeach
+      @foreach ($orders->extra_selections as $name)
+        <span class="text-muted">+ {{ $name }}</span><br>
+      @endforeach
+      @foreach ($orders->without_selections as $name)
+        <span class="text-dark">− {{ trans('labels.without_named', ['name' => $name]) }}</span><br>
+      @endforeach
+      @if (filled($orders->item_notes))
+        <span class="text-dark">{{ trans('labels.special_request') }}: {{ $orders->item_notes }}</span><br>
       @endif
     </h6>
   </td>

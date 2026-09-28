@@ -62,14 +62,23 @@
                                                                     class="item-type-image" alt="">
                                                                 {{ $cartitems->item_name }}
                                                             </h5>
-                                                            @if ($cartitems->addons_id != '' || $cartitems->extras_id != '')
-                                                                <small>
-                                                                    <a class="text-muted fw-400 fs-7" href="javascript:void(0)"
-                                                                       onclick="showaddons('{{ $cartitems['addons_name'] }}','{{ $cartitems['addons_price'] }}','{{ $cartitems['extras_name'] }}','{{ $cartitems['extras_price'] }}','{{ $cartitems['item_name'] }}')">
-                                                                        {{ trans('labels.customize') }}
-                                                                    </a>
-                                                                </small>
-                                                                <br>
+                                                            @php
+                                                                $withoutNames = array_filter(array_map('trim', explode('|', (string) $cartitems->without_addons)));
+                                                                $addonNames = array_filter(array_map('trim', explode('|', (string) $cartitems->addons_name)),
+                                                                    fn ($name) => $name !== '' && !in_array($name, $withoutNames, true));
+                                                                $extraNames = array_filter(array_map('trim', explode('|', (string) $cartitems->extras_name)));
+                                                                $additionNames = array_merge($addonNames, $extraNames);
+                                                            @endphp
+                                                            @foreach ($additionNames as $name)
+                                                                <small class="d-block text-success">+ {{ $name }}</small>
+                                                            @endforeach
+                                                            @if (filled($cartitems->without_addons))
+                                                                @foreach ($withoutNames as $name)
+                                                                    <small class="d-block text-danger">− {{ trans('labels.without_named', ['name' => $name]) }}</small>
+                                                                @endforeach
+                                                            @endif
+                                                            @if (filled($cartitems->item_notes))
+                                                                <small class="d-block text-muted">{{ trans('labels.special_request') }}: {{ $cartitems->item_notes }}</small>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -218,26 +227,3 @@
         })();
     </script>
 @endsection
-
-<!-- MODAL_SELECTED_ADDONS--START -->
-<div class="modal addons" id="modal_selected_addons" tabindex="-1" aria-labelledby="selected_addons_Label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header justify-content-between">
-                <p class="mb-0 fw-600 fs-5" id="addon_item_name"></p>
-                <button type="button" class="btn-close m-0" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-0">
-                <div class="mt-2 p-2 border-bottom d-none" id="addons">
-                    <p class="m-0 fs-6 fw-500">{{ trans('labels.addons') }}</p>
-                    <ul class="m-0 {{ session()->get('direction') == '2' ? 'pe-2' : 'ps-2' }}" id="item-addons"></ul>
-                </div>
-                <div class="mt-2 p-2 border-bottom d-none" id="extras">
-                    <p class="m-0 fs-6 fw-500">{{ trans('labels.extras') }} </p>
-                    <ul class="m-0 {{ session()->get('direction') == '2' ? 'pe-2' : 'ps-2' }}" id="item-extras"></ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- MODAL_SELECTED_ADDONS--END -->

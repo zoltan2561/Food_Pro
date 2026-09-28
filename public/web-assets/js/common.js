@@ -67,12 +67,14 @@
         }
         const addons = [...document.querySelectorAll('.addons_chk_' + id + ':checked')];
         const extras = [...document.querySelectorAll('.extras_chk_' + id + ':checked')];
+        const withoutGroups = addons.filter(input => input.dataset.groupId).map(input => input.dataset.groupId);
         const join = (items, field) => items.map(input => input.dataset[field] || '').join('| ');
         const data = {
             slug, item_name: value('item_name_' + id), item_type: value('item_type_' + id),
             image_name: value('image_name_' + id), tax: value('item_tax_' + id), item_price: value('item_price_' + id),
             addons_id: join(addons, 'addonsId'), addons_name: join(addons, 'addonsName'), addons_price: join(addons, 'addonsPrice'),
             extras_id: join(extras, 'extrasId'), extras_name: join(extras, 'extrasName'), extras_price: join(extras, 'extrasPrice'),
+            without_groups: withoutGroups.join('|'), item_notes: value('item_notes_' + id).trim(),
             qty: value('item_qty_' + slug) || '1', buynow
         };
         try {

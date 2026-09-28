@@ -222,15 +222,18 @@
                                             <img @if ($orders['item_type'] == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
                                                 class="item-type-img" alt="">
                                             <span class="fs-7">{{ $orders->item_name }}</span>
-                                            <p class="mb-0 mt-1">
-                                                @if ($orders['addons_id'] != '' || $orders['extras_id'] != '')
-                                                    <small>
-                                                        <a class="text-muted fw-5400" href="javascript:void(0)"
-                                                            onclick="showaddons('{{ $orders['addons_name'] }}','{{ $orders['addons_price'] }}','{{ $orders['extras_name'] }}','{{ $orders['extras_price'] }}','{{ $orders['item_name'] }}')">{{ trans('labels.customize') }}
-                                                        </a>
-                                                    </small>
-                                                @endif
-                                            </p>
+                                            @foreach ($orders->addon_selections as $name)
+                                                <small class="d-block text-success">+ {{ $name }}</small>
+                                            @endforeach
+                                            @foreach ($orders->extra_selections as $name)
+                                                <small class="d-block text-success">+ {{ $name }}</small>
+                                            @endforeach
+                                            @foreach ($orders->without_selections as $name)
+                                                <small class="d-block text-danger">− {{ trans('labels.without_named', ['name' => $name]) }}</small>
+                                            @endforeach
+                                            @if (filled($orders->item_notes))
+                                                <small class="d-block text-muted">{{ trans('labels.special_request') }}: {{ $orders->item_notes }}</small>
+                                            @endif
                                         </td>
                                         <td class="text-end fs-7">{{ helper::currency_format($orders->item_price) }}
                                             @if ($addonstotal != '0')

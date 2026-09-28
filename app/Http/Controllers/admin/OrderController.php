@@ -166,21 +166,20 @@ class OrderController extends Controller
     }
     public function invoice(Request $request)
     {
-        $od = Order::where('id', $request->id)->first();
-        $orderdata = Order::with('user_info', 'driver_info')->where('order.id', $request->id)->first();
+        $orderdata = Order::with('user_info', 'driver_info')->where('order.id', $request->id)->firstOrFail();
         $ordersdetails = OrderDetails::where('order_details.order_id', $request->id)->get();
         $getdriver = User::where('type', '3')->where('is_available', 1)->orderByDesc('id')->get();
         return view('admin.orders.invoice', compact('orderdata', 'ordersdetails', 'getdriver'));
     }
     public function print(Request $request)
     {
-        $orderdata = Order::with('user_info', 'driver_info')->where('order.id', $request->id)->first();
+        $orderdata = Order::with('user_info', 'driver_info')->where('order.id', $request->id)->firstOrFail();
         $ordersdetails = OrderDetails::where('order_details.order_id', $request->id)->get();
         return view('admin.orders.print', compact('orderdata', 'ordersdetails'));
     }
     public function generatepdf(Request $request)
     {
-        $getorderdata = Order::with('user_info', 'driver_info')->where('order.id', $request->id)->first();
+        $getorderdata = Order::with('user_info', 'driver_info')->where('order.id', $request->id)->firstOrFail();
         $ordersdetails =  OrderDetails::where('order_details.order_id', $request->id)->get();
         $pdf = Pdf::loadView('admin.orders.invoicepdf', ['getorderdata' => $getorderdata, 'ordersdetails' => $ordersdetails]);
         return $pdf->download('orderinvoice.pdf');

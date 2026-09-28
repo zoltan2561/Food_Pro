@@ -91,6 +91,11 @@ class CartController extends Controller
             };
             $addonIds = $parseIds($request->input('addons_id'));
             $extraIds = $parseIds($request->input('extras_id'));
+            $withoutGroupIds = $parseIds($request->input('without_groups'));
+            $itemNotes = $request->input('item_notes', '');
+            if (!is_string($itemNotes) || mb_strlen(trim($itemNotes)) > 250) {
+                return response()->json(['status' => 0, 'message' => 'A termékhez írt kérés legfeljebb 250 karakter lehet.'], 422);
+            }
             $allowedGroups = $parseIds(str_replace(',', '|', (string) $itemdata->addons_id));
             $groups = AddonsGroup::whereIn('id', $allowedGroups)->where('is_deleted', 2)->where('is_available', 1)->get();
             $addons = Addons::whereIn('id', $addonIds)->whereIn('addongroup_id', $groups->pluck('id'))
@@ -98,6 +103,13 @@ class CartController extends Controller
             $extras = Extra::where('item_id', $itemdata->id)->whereIn('id', $extraIds)->get();
             if ($addons->count() !== count($addonIds) || $extras->count() !== count($extraIds)) {
                 return response()->json(['status' => 0, 'message' => 'Érvénytelen feltét vagy extra.'], 422);
+            }
+            $withoutGroups = $groups->whereIn('id', $withoutGroupIds);
+            if ($withoutGroups->count() !== count($withoutGroupIds) || $withoutGroups->contains(function ($group) use ($addons) {
+                return (int) $group->selection_type !== 2 || (int) $group->selection_count !== 1
+                    || $addons->contains('addongroup_id', $group->id);
+            })) {
+                return response()->json(['status' => 0, 'message' => 'Érvénytelen „feltét nélkül” választás.'], 422);
             }
             foreach ($groups as $group) {
                 if (!Addons::where('addongroup_id', $group->id)->where('is_deleted', 2)->where('is_available', 1)->exists()) {
@@ -146,6 +158,11 @@ class CartController extends Controller
             $cart->extras_name        = $extras->pluck('name')->implode('| ');
             $cart->extras_price       = $extras->pluck('price')->implode('| ');
             $cart->extras_total_price = helper::number_format($extras->sum('price'));
+            $removedNames = $addons->filter(function ($addon) use ($groups) {
+                return (bool) optional($groups->firstWhere('id', $addon->addongroup_id))->is_removal;
+            })->pluck('name');
+            $cart->without_addons     = $removedNames->merge($withoutGroups->reject(fn ($group) => (bool) $group->is_removal)->pluck('name'))->implode('| ');
+            $cart->item_notes         = trim($itemNotes);
             $cart->qty                = $quantity;
             $cart->buynow             = $buynow;
             $cart->save();

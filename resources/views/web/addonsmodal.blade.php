@@ -83,7 +83,7 @@
                             <div class="form-check foodpro-choice">
                                 <input class="form-check-input addons_chk_{{ $itemdata['id'] }}" type="radio" value=""
                                     name="addons_id_{{ $addons_group->id }}_{{ $itemdata['id'] }}"
-                                    id="addons_none_{{ $addons_group->id }}_{{ $itemdata['id'] }}" checked
+                                    id="addons_none_{{ $addons_group->id }}_{{ $itemdata['id'] }}" data-group-id="{{ $addons_group->id }}" checked
                                     onclick="getaddons('{{ $itemdata['id'] }}')">
                                 <label class="form-check-label" for="addons_none_{{ $addons_group->id }}_{{ $itemdata['id'] }}">{{ trans('labels.no_topping') }}</label>
                             </div>
@@ -171,6 +171,11 @@
                     @endforeach
                 </div>
         @endif
+        <div class="item-details mt-3">
+            <label class="form-label fw-600 fs-7" for="item_notes_{{ $itemdata['id'] }}">{{ trans('labels.special_request') }}</label>
+            <textarea class="form-control" id="item_notes_{{ $itemdata['id'] }}" maxlength="250" rows="2"
+                placeholder="{{ trans('labels.special_request_o') }}"></textarea>
+        </div>
         <input type="hidden" name="addongroup" id="addongroup_{{ $itemdata['id'] }}"
             data-addongroup_val="{{ $itemdata['addons_group'] }}">
         <input type="hidden" name="slug" id="slug_{{ $itemdata['id'] }}" value="{{ $itemdata['slug'] }}">

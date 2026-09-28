@@ -268,7 +268,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table staff-order-table">
                                 <thead>
                                     <tr>
                                         <th>{{ trans('labels.image') }}</th>
@@ -297,16 +297,23 @@
                                             <td><img src="{{ helper::image_path($orders->item_image) }}"
                                                     class="rounded h-50px" alt=""></td>
                                             <td>
-                                                <img @if ($orders['item_type'] == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
-                                                    class="item-type-img" alt="">
-                                                {{ $orders->item_name }} <br>
-                                                @if ($orders['addons_id'] != '' || $orders['extras_id'] != '')
-                                                    <small>
-                                                        <a class="text-muted fw-500" href="javascript:void(0)"
-                                                            onclick="showaddons('{{ $orders['addons_name'] }}','{{ $orders['addons_price'] }}','{{ $orders['extras_name'] }}','{{ $orders['extras_price'] }}','{{ $orders['item_name'] }}')">{{ trans('labels.customize') }}
-                                                        </a>
-                                                    </small>
-                                                @endif
+                                                <div class="staff-order-item">
+                                                    <img @if ($orders['item_type'] == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
+                                                        class="item-type-img" width="18" height="18" alt="">
+                                                    <strong>{{ $orders->item_name }}</strong>
+                                                    @foreach ($orders->addon_selections as $name)
+                                                        <span class="staff-order-change staff-order-change--plus">+ {{ $name }}</span>
+                                                    @endforeach
+                                                    @foreach ($orders->extra_selections as $name)
+                                                        <span class="staff-order-change staff-order-change--plus">+ {{ $name }}</span>
+                                                    @endforeach
+                                                    @foreach ($orders->without_selections as $name)
+                                                        <span class="staff-order-change staff-order-change--minus">− {{ trans('labels.without_named', ['name' => $name]) }}</span>
+                                                    @endforeach
+                                                    @if (filled($orders->item_notes))
+                                                        <span class="staff-order-note"><i class="fa-solid fa-note-sticky" aria-hidden="true"></i> {{ $orders->item_notes }}</span>
+                                                    @endif
+                                                </div>
                                             </td>
                                             <td class="text-end">
                                                 {{ helper::currency_format($orders->item_price) }}
@@ -478,66 +485,11 @@
                 </div>
             </div>
         </div>
-        <!-- MODAL_SELECTED_ADDONS--START -->
-        <div class="modal addons fade" id="modal_selected_addons" tabindex="-1" aria-labelledby="selected_addons_Label"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header justify-content-between">
-                        <div class="pro-name d-flex gap-1 align-items-center">
-                            <p class="mb-0 fw-600 fs-5" id="addon_item_name"></p>
-                        </div>
-                        <button type="button"
-                            class="btn-close m-0 {{ session()->get('direction') == 2 ? 'close m-0' : '' }}"
-                            data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body py-0">
-                        <!-- Addons -->
-                        <div class="mt-2 p-2 border-bottom d-none" id="addons">
-                            <p class="m-0 fs-6 fw-500">{{ trans('labels.addons') }}</p>
-                            <ul class="m-0 {{ session()->get('direction') == '2' ? 'pe-2' : 'ps-2' }}" id="item-addons"></ul>
-                        </div>
-                        <!-- Extras -->
-                        <div class="mt-2 p-2 border-bottom d-none" id="extras">
-                            <p class="m-0 fs-6 fw-500">{{ trans('labels.extras') }} </p>
-                            <ul class="m-0 {{ session()->get('direction') == '2' ? 'pe-2' : 'ps-2' }}" id="item-extras"></ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL_SELECTED_ADDONS--END -->
     </div>
 @endsection
 @section('script')
     <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/custom/orders.js') }}"></script>
     <script>
-        function showaddons(addon_name, addon_price, extra_name, extra_price, item_name) {
-            "use strict";
-            $('#addons').addClass('d-none');
-            $('#extras').addClass('d-none');
-            $('#modal_selected_addons').find('#addon_item_name').html(item_name);
-            var response1 = '';
-            if (addon_name.split('| ') != '') {
-                $.each(addon_name.split('| '), function(key, value) {
-                    response1 += '<li class="list-group-item fs-7 d-flex justify-content-between text-black">' + value +
-                        ' <p class="mb-0">' + currency_format(addon_price.split('| ')[key]) + '</p> </li>';
-                });
-                $('#addons').removeClass('d-none');
-            }
-            $('#item-addons').html(response1);
-            var response2 = '';
-            if (extra_name.split('| ') != '') {
-                $.each(extra_name.split('| '), function(key, value) {
-                    response2 += '<li class="list-group-item fs-7 d-flex justify-content-between text-black"> ' + value +
-                        ' <p class="mb-0">' + currency_format(extra_price.split('| ')[key]) + '</p> </li>';
-                });
-                $('#extras').removeClass('d-none');
-            }
-            $('#item-extras').html(response2);
-            $('#modal_selected_addons').modal('show');
-        }
-
         function editcustomerdata(order_id, customer_name, customer_mobile, customer_email, bill_address, bill_city,
             bill_state, bill_country, bill_landmark, bill_pincode, type) {
             "use strict";

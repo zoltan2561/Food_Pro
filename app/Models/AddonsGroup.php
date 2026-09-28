@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AddonsGroup extends Model
 {
     protected $table = 'addons_group';
-    protected $fillable = ['name', 'selection_type', 'selection_count', 'min_count', 'max_count'];
+    protected $fillable = ['name', 'selection_type', 'selection_count', 'min_count', 'max_count', 'is_removal'];
     public function category()
     {
         return $this->hasOne('App\Models\Category', 'id', 'cat_id');

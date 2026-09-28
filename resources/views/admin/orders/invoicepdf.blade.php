@@ -217,17 +217,25 @@
                         @endphp
                         @if ($orders->addons_id != '')
                             @foreach ($addons_name as $key => $val)
-                                <small class="text-muted">{{ $addons_name[$key] }} :
-                                    <span>{{ helper::currency_format($addons_price[$key]) }}</span>
-                                </small><br>
+                                @if (!in_array(trim($val), $orders->without_selections, true))
+                                    <small class="text-muted">+ {{ $val }} :
+                                        <span>{{ helper::currency_format($addons_price[$key] ?? 0) }}</span>
+                                    </small><br>
+                                @endif
                             @endforeach
                         @endif
                         @if ($orders->extras_id != '')
                             @foreach ($extras_name as $key => $val)
-                                <small class="text-muted">{{ $extras_name[$key] }} :
-                                    <span>{{ helper::currency_format($extras_price[$key]) }}</span>
+                                <small class="text-muted">+ {{ $extras_name[$key] }} :
+                                    <span>{{ helper::currency_format($extras_price[$key] ?? 0) }}</span>
                                 </small><br>
                             @endforeach
+                        @endif
+                        @foreach ($orders->without_selections as $name)
+                            <small>− {{ trans('labels.without_named', ['name' => $name]) }}</small><br>
+                        @endforeach
+                        @if (filled($orders->item_notes))
+                            <small>{{ trans('labels.special_request') }}: {{ $orders->item_notes }}</small><br>
                         @endif
                     </td>
                     <td>{{ helper::currency_format($orders->item_price) }}

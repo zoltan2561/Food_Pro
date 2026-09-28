@@ -62,13 +62,14 @@ CREATE TABLE `addons_group` (
   `is_deleted` int(11) NOT NULL DEFAULT 2 COMMENT '1 = Yes , 2 = No',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `is_removal` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 LOCK TABLES `addons_group` WRITE;
 /*!40000 ALTER TABLE `addons_group` DISABLE KEYS */;
-INSERT INTO `addons_group` VALUES (1,0,'Mártások',2,2,0,2,1,2,'2025-09-04 09:11:18','2025-09-07 11:57:48'),(2,0,'Köret',1,1,1,1,1,2,'2025-09-04 14:03:17','2025-09-04 14:03:17'),(3,0,'Szósz',1,2,2,2,1,2,'2025-09-25 17:06:44','2025-09-25 17:06:44'),(4,0,'Üdítő',1,1,1,1,1,2,'2025-09-25 17:42:13','2025-09-25 17:42:13'),(5,0,'Üditő 2',1,1,1,1,1,2,'2025-09-30 16:30:04','2025-09-30 16:30:04'),(6,0,'Ízesités',1,1,1,1,1,2,'2025-09-30 17:58:06','2025-09-30 18:00:47'),(7,0,'Marlenka ízesítése',1,1,1,1,1,2,'2025-09-30 18:02:57','2025-09-30 18:02:57'),(8,0,'Baklava ízesitése',1,1,1,1,1,2,'2025-09-30 18:04:30','2025-09-30 18:04:30'),(9,0,'Kihagyandó összetevők',2,2,0,6,1,2,'2025-10-11 12:32:37','2026-09-27 20:54:32'),(10,0,'Köret:',1,2,1,1,1,2,'2025-10-12 15:09:28','2025-10-12 15:09:28'),(11,0,'Extra szósz',2,1,1,1,1,2,'2026-09-27 20:45:06','2026-09-27 20:45:06');
+INSERT INTO `addons_group` VALUES (1,0,'Mártások',2,2,0,2,1,2,'2025-09-04 09:11:18','2025-09-07 11:57:48',0),(2,0,'Köret',1,1,1,1,1,2,'2025-09-04 14:03:17','2025-09-04 14:03:17',0),(3,0,'Szósz',1,2,2,2,1,2,'2025-09-25 17:06:44','2025-09-25 17:06:44',0),(4,0,'Üdítő',1,1,1,1,1,2,'2025-09-25 17:42:13','2025-09-25 17:42:13',0),(5,0,'Üditő 2',1,1,1,1,1,2,'2025-09-30 16:30:04','2025-09-30 16:30:04',0),(6,0,'Ízesités',1,1,1,1,1,2,'2025-09-30 17:58:06','2025-09-30 18:00:47',0),(7,0,'Marlenka ízesítése',1,1,1,1,1,2,'2025-09-30 18:02:57','2025-09-30 18:02:57',0),(8,0,'Baklava ízesitése',1,1,1,1,1,2,'2025-09-30 18:04:30','2025-09-30 18:04:30',0),(9,0,'Kihagyandó összetevők',2,2,0,6,1,2,'2025-10-11 12:32:37','2026-09-27 20:54:32',1),(10,0,'Köret:',1,2,1,1,1,2,'2025-10-12 15:09:28','2025-10-12 15:09:28',0),(11,0,'Extra szósz',2,1,1,1,1,2,'2026-09-27 20:45:06','2026-09-27 20:45:06',0);
 /*!40000 ALTER TABLE `addons_group` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `address`;
@@ -276,6 +277,8 @@ CREATE TABLE `cart` (
   `extras_name` varchar(255) DEFAULT NULL,
   `extras_price` varchar(255) DEFAULT NULL,
   `extras_total_price` int(11) DEFAULT NULL,
+  `without_addons` text DEFAULT NULL,
+  `item_notes` text DEFAULT NULL,
   `buynow` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -592,7 +595,7 @@ CREATE TABLE `migrations` (
 
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2014_10_12_100000_create_password_resets_table',1),(3,'2019_08_19_000000_create_failed_jobs_table',1),(6,'2020_06_05_070854_create_categories_table',2),(7,'2020_06_05_103122_create_item_table',3),(9,'2020_06_05_110205_create_item_images_table',4),(10,'2020_06_05_125414_create_ingredients_table',5),(14,'2020_06_06_055110_create_cart_table',6),(16,'2020_06_07_051607_create_order_table',7),(18,'2020_06_07_063234_create_order_details_table',8),(19,'2020_06_16_094849_create_ratting_table',9),(20,'2022_05_06_115647_create_roles_table',10),(21,'2022_05_19_042851_create_subcategories_table',11),(22,'2022_05_25_053255_create_blogs_table',12),(23,'2022_05_25_072838_create_teams_table',13),(24,'2022_05_25_100726_create_tutorials_table',14),(25,'2022_05_25_105457_create_faqs_table',15),(26,'2022_05_25_110626_create_galleries_table',16),(27,'2022_05_27_084728_create_zones_table',17),(29,'2022_06_18_074001_create_bookings_table',18),(30,'2019_12_14_000001_create_personal_access_tokens_table',19),(31,'2023_08_10_043354_create_subscribe_table',19),(32,'2025_09_13_000000_add_delivery_enabled_to_settings',20),(33,'2026_09_27_000001_add_admin_skin_to_settings',21),(34,'2026_09_28_000001_add_navigation_config_to_settings',22);
+INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2014_10_12_100000_create_password_resets_table',1),(3,'2019_08_19_000000_create_failed_jobs_table',1),(6,'2020_06_05_070854_create_categories_table',2),(7,'2020_06_05_103122_create_item_table',3),(9,'2020_06_05_110205_create_item_images_table',4),(10,'2020_06_05_125414_create_ingredients_table',5),(14,'2020_06_06_055110_create_cart_table',6),(16,'2020_06_07_051607_create_order_table',7),(18,'2020_06_07_063234_create_order_details_table',8),(19,'2020_06_16_094849_create_ratting_table',9),(20,'2022_05_06_115647_create_roles_table',10),(21,'2022_05_19_042851_create_subcategories_table',11),(22,'2022_05_25_053255_create_blogs_table',12),(23,'2022_05_25_072838_create_teams_table',13),(24,'2022_05_25_100726_create_tutorials_table',14),(25,'2022_05_25_105457_create_faqs_table',15),(26,'2022_05_25_110626_create_galleries_table',16),(27,'2022_05_27_084728_create_zones_table',17),(29,'2022_06_18_074001_create_bookings_table',18),(30,'2019_12_14_000001_create_personal_access_tokens_table',19),(31,'2023_08_10_043354_create_subscribe_table',19),(32,'2025_09_13_000000_add_delivery_enabled_to_settings',20),(33,'2026_09_27_000001_add_admin_skin_to_settings',21),(34,'2026_09_28_000001_add_navigation_config_to_settings',22),(35,'2026_09_28_000002_add_item_requests_to_cart_and_order_details',23),(36,'2026_09_28_000003_add_removal_flag_to_addons_group',24);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `model_has_roles`;
@@ -697,6 +700,8 @@ CREATE TABLE `order_details` (
   `extras_name` varchar(255) DEFAULT NULL,
   `extras_price` varchar(255) DEFAULT NULL,
   `extras_total_price` varchar(255) DEFAULT NULL,
+  `without_addons` text DEFAULT NULL,
+  `item_notes` text DEFAULT NULL,
   `item_price` varchar(255) NOT NULL,
   `tax` double DEFAULT NULL,
   `qty` varchar(255) DEFAULT NULL,

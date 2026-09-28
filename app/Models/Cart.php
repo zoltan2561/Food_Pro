@@ -10,6 +10,6 @@ class Cart extends Model
     public $timestamps = true;
     protected $fillable = ['session_id','user_id','item_id','item_name','item_image','item_type',
         'tax','item_price','addons_id','addons_name','addons_price','addons_total_price',
-        'extras_id','extras_name','extras_price','extras_total_price','qty','buynow','status'];
+        'extras_id','extras_name','extras_price','extras_total_price','without_addons','item_notes','qty','buynow','status'];
 
 }

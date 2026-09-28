@@ -508,6 +508,8 @@ class CheckoutController extends Controller
                     $od->extras_name = $cart->extras_name;
                     $od->extras_price = $cart->extras_price;
                     $od->extras_total_price = $cart->extras_total_price;
+                    $od->without_addons = $cart->without_addons;
+                    $od->item_notes = $cart->item_notes;
                     $od->save();
                 }
 

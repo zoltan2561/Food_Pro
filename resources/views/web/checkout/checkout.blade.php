@@ -386,8 +386,23 @@
                                             <div class="checkout-item-info">
                                                 <strong>{{ $cartitem->item_name }}</strong>
                                                 <small>{{ $cartitem->qty }} × {{ helper::currency_format($cartitem->item_price + $cartitem->addons_total_price + $cartitem->extras_total_price) }}</small>
-                                                @if ($cartitem->addons_name || $cartitem->extras_name)
-                                                    <small>{{ str_replace('| ', ', ', trim($cartitem->addons_name . ', ' . $cartitem->extras_name, ', ')) }}</small>
+                                                @php
+                                                    $withoutNames = array_filter(array_map('trim', explode('|', (string) $cartitem->without_addons)));
+                                                    $addonNames = array_filter(array_map('trim', explode('|', (string) $cartitem->addons_name)),
+                                                        fn ($name) => $name !== '' && !in_array($name, $withoutNames, true));
+                                                    $extraNames = array_filter(array_map('trim', explode('|', (string) $cartitem->extras_name)));
+                                                    $additionNames = array_merge($addonNames, $extraNames);
+                                                @endphp
+                                                @foreach ($additionNames as $name)
+                                                    <small>+ {{ $name }}</small>
+                                                @endforeach
+                                                @if (filled($cartitem->without_addons))
+                                                    @foreach ($withoutNames as $name)
+                                                        <small>− {{ trans('labels.without_named', ['name' => $name]) }}</small>
+                                                    @endforeach
+                                                @endif
+                                                @if (filled($cartitem->item_notes))
+                                                    <small>{{ trans('labels.special_request') }}: {{ $cartitem->item_notes }}</small>
                                                 @endif
                                             </div>
                                             <strong class="checkout-item-total">{{ helper::currency_format(($cartitem->item_price + $cartitem->addons_total_price + $cartitem->extras_total_price) * $cartitem->qty) }}</strong>

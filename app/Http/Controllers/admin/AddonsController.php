@@ -120,6 +120,7 @@ class AddonsController extends Controller
         $addongroup->selection_count = $request->selection_count;
         $addongroup->min_count = $request->selection_count == 1 ? 1 : $request->min_count;
         $addongroup->max_count = $request->selection_count == 1 ? 1 : $request->max_count;
+        $addongroup->is_removal = $request->boolean('is_removal');
         $addongroup->save();
         return redirect('admin/addongroup')->with('success', trans('messages.success'));
     }
@@ -138,6 +139,7 @@ class AddonsController extends Controller
         $addongroup->selection_count = $request->selection_count;
         $addongroup->min_count = $request->selection_count == 1 ? 1 : $request->min_count;
         $addongroup->max_count = $request->selection_count == 1 ? 1 : $request->max_count;
+        $addongroup->is_removal = $request->boolean('is_removal');
         $addongroup->save();
         return redirect('admin/addongroup')->with('success', trans('messages.success'));
     }

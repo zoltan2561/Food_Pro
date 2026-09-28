@@ -164,6 +164,8 @@ class BarionController extends Controller
                         'extras_name'=> $c->extras_name,
                         'extras_price'=> $c->extras_price,
                         'extras_total_price'=> $c->extras_total_price,
+                        'without_addons'=> $c->without_addons,
+                        'item_notes'=> $c->item_notes,
                     ];
                 })->values()->all(),
 
@@ -532,6 +534,8 @@ class BarionController extends Controller
                     $od->extras_name         = $it['extras_name'] ?? '';
                     $od->extras_price        = $it['extras_price'] ?? 0;
                     $od->extras_total_price  = $it['extras_total_price'] ?? 0;
+                    $od->without_addons      = $it['without_addons'] ?? null;
+                    $od->item_notes          = $it['item_notes'] ?? null;
                     $od->save();
                 }
 
