@@ -403,7 +403,7 @@ class helper
     public static function getpayment($payment_type)
     {
         $payment = Payment::select('payment_name')->where('payment_type', $payment_type)->first();
-        return $payment->payment_name;
+        return $payment?->payment_name ?? 'Ismeretlen fizetési mód';
     }
     public static function paymentlist()
     {

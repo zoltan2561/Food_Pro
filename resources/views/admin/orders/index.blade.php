@@ -35,14 +35,17 @@
                             <input type="text" class="form-control numbers_only" name="modal_total_amount"
                                 id="modal_total_amount" disabled value="">
 
-                            <label for="modal_amount" class="form-label mt-2">
-                                {{ trans('labels.cash_received') }}
-                            </label>
-                            <input type="text" class="form-control numbers_only" name="modal_amount" id="modal_amount"
-                                value="" onkeyup="validation($(this).val())">
-                            <label for="modal_amount" class="form-label mt-2">
-                                {{ trans('labels.change_amount') }}
-                            </label>
+                            <p id="card_payment_notice" class="alert alert-info mt-3 d-none mb-0">Csak akkor jelöld fizetettnek, ha a terminálon sikeres volt a tranzakció.</p>
+                            <div id="cash_payment_fields">
+                                <label for="modal_amount" class="form-label mt-2">
+                                    {{ trans('labels.cash_received') }}
+                                </label>
+                                <input type="text" class="form-control numbers_only" name="modal_amount" id="modal_amount"
+                                    value="" onkeyup="validation($(this).val())">
+                                <label for="ramin_amount" class="form-label mt-2">
+                                    {{ trans('labels.change_amount') }}
+                                </label>
+                            </div>
                             <input type="number" class="form-control" name="ramin_amount" id="ramin_amount" value=""
                                 readonly>
                         </div>
@@ -57,9 +60,14 @@
 @endsection
 @section('script')
     <script>
-        function codpayment(booking_number, grand_total) {
+        function codpayment(booking_number, grand_total, payment_type) {
             $('#modal_total_amount').val(grand_total);
             $('#booking_number').val(booking_number);
+            const card = payment_type === 17;
+            $('#card_payment_notice').toggleClass('d-none', !card);
+            $('#cash_payment_fields').toggleClass('d-none', card);
+            $('#ramin_amount').toggleClass('d-none', card).val(card ? 0 : '');
+            $('#modal_amount').val('');
             $('#paymentModal').modal('show');
         }
 

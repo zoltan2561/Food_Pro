@@ -84,6 +84,12 @@
                                             </p>
                                         </li>
 
+                                        @if ((int) $orderdata->transaction_type === 17)
+                                            <li class="list-group-item px-0">
+                                                <strong class="badge bg-primary fs-6">Terminálos fizetés várható átvételkor</strong>
+                                            </li>
+                                        @endif
+
                                         @if (in_array($orderdata->transaction_type, [3, 4, 5, 6, 7, 8, 9, 10]))
                                             <li class="list-group-item px-0 fs-7 fw-400 d-flex justify-content-between align-items-center">
                                                 {{ trans('labels.transaction_id') }}
@@ -94,7 +100,7 @@
                                         @endif
                                         @if ($orderdata->order_notes != '')
                                             <li class="list-group-item px-0">{{ trans('labels.order_note') }}
-                                                <p class="text-muted">
+                                                <p class="text-muted" style="white-space: pre-line">
                                                     {{ $orderdata->order_notes }}
                                                 </p>
                                             </li>

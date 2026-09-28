@@ -14,7 +14,7 @@
         }
         if (!email?.value.trim() || !email.checkValidity()) { notify('Adj meg egy érvényes e-mail címet.'); email?.focus(); return; }
         if (!payment) { notify('Válassz fizetési módot.'); return; }
-        if (![1, 2].includes(Number(payment.value))) { notify('Ez a fizetési mód jelenleg nem érhető el.'); return; }
+        if (![1, 17].includes(Number(payment.value))) { notify('Ez a fizetési mód jelenleg nem érhető el.'); return; }
         if (orderType === '1') {
             for (const field of [document.getElementById('new_address'), document.getElementById('new_city'), document.getElementById('delivery_area')]) {
                 if (!field?.value.trim()) { notify('Add meg a szállítási címet és területet.'); field?.focus(); return; }

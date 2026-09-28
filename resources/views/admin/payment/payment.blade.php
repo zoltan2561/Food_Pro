@@ -14,7 +14,7 @@
                             @foreach ($getpayment as $key => $pmdata)
                                 @php
                                     // Check if the current $pmdata is a system addon and activated
-                                    if (in_array((int) $pmdata->payment_type, [1, 2, 16], true)) {
+                                    if (in_array((int) $pmdata->payment_type, [1, 17, 16], true)) {
                                         $systemAddonActivated = true;
                                     } else {
                                         $systemAddonActivated = false;
@@ -221,6 +221,11 @@
                                                             </div>
                                                         </div>
                                                     @elseif($transaction_type == 16)
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label" for="barion_payment_image">{{ trans('labels.image') }}</label>
+                                                            <input type="file" class="form-control" id="barion_payment_image" name="image" accept="image/png,image/jpeg,image/webp,image/gif">
+                                                            <img src="{{ helper::image_path($pmdata->image) }}" alt="" class="img-fluid rounded h-50px mt-2">
+                                                        </div>
                                                         <div class="col-12 mb-3">
                                                             <div class="alert alert-info mb-0">
                                                                 Barion sandbox mód. Az éles fizetés ebben a Food Pro példányban ki van kapcsolva.
@@ -243,7 +248,7 @@
                                                         <div class="col-12">
                                                             <p class="small text-muted">Mentés után a kapcsoló engedélyezi vagy tiltja ezt a fizetési módot a vásárlóknak.</p>
                                                         </div>
-                                                    @elseif($transaction_type == 1 || $transaction_type == 2)
+                                                    @elseif($transaction_type == 1 || $transaction_type == 17)
                                                         <div class="col-md-6">
                                                             <label for="image" class="form-label">
                                                                 {{ trans('labels.image') }}

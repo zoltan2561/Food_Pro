@@ -109,23 +109,12 @@ h5{ font-size:28px; margin:0; letter-spacing:1px; }
     // Alapadatok
     $transactionType = (int)($orderdata->transaction_type ?? 0);
     $orderType = (int)($orderdata->order_type ?? 0);
-    $note = mb_strtoupper($orderdata->instruction ?? $orderdata->notes ?? $orderdata->order_notes ?? '');
-
-    // Alapértelmezett címke
-    $paymentLabel = 'FIZETÉS'.$transactionType;
-
-    // 1️⃣ Készpénz
-    if ($transactionType === 1 && !str_contains($note, 'KÁRTYÁVAL') ) {
-        $paymentLabel = 'KÉSZPÉNZ';
-    }
-    // 2️⃣ Helyszíni kártyás (POS terminál)
-    elseif ($transactionType === 1 && str_contains($note, 'KÁRTYÁVAL')) {
-        $paymentLabel = 'KÁRTYÁS';
-    }
-    // 3️⃣ Online kártyás (Barion, Stripe stb.)
-    elseif ($transactionType === 16 || $orderType === 16) {
-        $paymentLabel = 'ONLINE KÁRTYÁS';
-    }
+    $paymentLabel = match ($transactionType) {
+        1 => 'KÉSZPÉNZ ÁTVÉTELKOR',
+        17 => 'KÁRTYA ÁTVÉTELKOR (TERMINÁL)',
+        16 => 'BARION ONLINE',
+        default => mb_strtoupper(helper::getpayment($transactionType)),
+    };
 @endphp
 
 
@@ -356,7 +345,7 @@ h5{ font-size:28px; margin:0; letter-spacing:1px; }
                                 @if(!empty($order_note))
                                     <div class="underline-3 note-box">
                                         <div class="note-title">{{ trans('labels.note') }}</div>
-                                        <div class="note-text">{{ $order_note }}</div>
+                                        <div class="note-text" style="white-space: pre-line">{{ $order_note }}</div>
                                     </div>
                                 @endif
 

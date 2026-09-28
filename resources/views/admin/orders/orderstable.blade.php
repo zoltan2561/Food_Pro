@@ -51,6 +51,9 @@
                     @else
                         {{ helper::getpayment($orderdata->transaction_type) }}
                     @endif
+                    @if ((int) $orderdata->transaction_type === 17 && (int) $orderdata->payment_status === 1)
+                        <span class="d-block badge bg-primary mt-1">Terminálos fizetés várható</span>
+                    @endif
                     <br>
                     @if ($orderdata->payment_status == 1)
                         <small class="text-danger"> <i class="fa-regular fa-clock"></i>
@@ -88,9 +91,9 @@
                             tooltip="Download PDF">
                             <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
                         </a>
-                        @if ($orderdata->transaction_type == 1 && $orderdata->payment_status == 1 && $orderdata->status_type == 3)
-                            <a class="btn btn-sm btn-info square" tooltip="Payment Status"
-                                onclick="codpayment('{{ $orderdata->order_number }}','{{ $orderdata->grand_total }}')"><i
+                        @if (in_array((int) $orderdata->transaction_type, [1, 17], true) && $orderdata->payment_status == 1 && $orderdata->status_type == 3)
+                            <a class="btn btn-sm btn-info square" title="Fizetés rögzítése"
+                                onclick="codpayment('{{ $orderdata->order_number }}','{{ $orderdata->grand_total }}', {{ (int) $orderdata->transaction_type }})"><i
                                     class="fa-solid fa-file-invoice-dollar"></i>
                             </a>
                         @endif

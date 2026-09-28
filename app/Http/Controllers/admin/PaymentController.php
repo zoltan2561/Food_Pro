@@ -11,7 +11,7 @@ class PaymentController extends Controller
 {
     public function index()
     {
-        $getpayment = Payment::where('is_activate', 1)->whereIn('payment_type', [1, 2, 16])->orderBy('reorder_id')->get();
+        $getpayment = Payment::where('is_activate', 1)->whereIn('payment_type', [1, 17, 16])->orderBy('reorder_id')->get();
         $barionSetting = BarionSetting::where('env', 'test')->first();
         return view('admin.payment.payment', compact('getpayment', 'barionSetting'));
     }
@@ -24,7 +24,7 @@ class PaymentController extends Controller
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
         ]);
         $pay_data = Payment::where('payment_type', $request->payment_id)->firstOrFail();
-        abort_unless(in_array((int) $pay_data->payment_type, [1, 2, 16], true), 403);
+        abort_unless(in_array((int) $pay_data->payment_type, [1, 17, 16], true), 403);
 
         if ((int) $pay_data->payment_type === 16) {
             abort_unless((int) auth()->user()->type === 1, 403);
@@ -53,7 +53,7 @@ class PaymentController extends Controller
             $pay_data->environment = 1;
         }
 
-        $pay_data->is_available = $request->is_available != null ? $request->is_available[$pay_data->payment_type] : '2';
+        $pay_data->is_available = (int) $request->input('is_available.' . $pay_data->payment_type) === 1 ? 1 : 2;
         $pay_data->payment_name = $request->name;
 
         if (
@@ -78,11 +78,11 @@ class PaymentController extends Controller
                 $pay_data->base_url_by_region = $request->base_url_by_region;
             }
         }
-        if ($request->has('image')) {
+        if ($request->hasFile('image')) {
             if ($pay_data->image != strtolower($pay_data->payment_name) . ".png" && file_exists(public_path('admin-assets/images/about/') . $pay_data->image)) {
                 unlink(public_path('admin-assets/images/about/') . $pay_data->image);
             }
-            $image = 'payment-' . uniqid() . '.' . $request->file('image')->getClientOriginalExtension();
+            $image = 'payment-' . uniqid() . '.' . $request->file('image')->extension();
             $request->file('image')->move(public_path('admin-assets/images/about/'), $image);
             $pay_data->image = $image;
         }

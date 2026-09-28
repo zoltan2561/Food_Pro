@@ -42,11 +42,11 @@ class CheckoutController extends Controller
         if (Auth::user() && Auth::user()->type == 2) {
             $getaddresses = Address::select('id', 'user_id', 'address_type', 'address', 'landmark', 'postal_code', 'is_default', 'title')->where('user_id', Auth::user()->id)->orderbyDesc('id')->get();
             $getcartlist = Cart::where('user_id', Auth::user()->id)->where('buynow', $buynow)->orderByDesc('id')->get();
-            $getpaymentmethods = Payment::select('id', 'unique_identifier', 'environment', 'payment_name', 'payment_type', 'currency', 'public_key', 'secret_key', 'encryption_key', 'image')->whereIn('payment_type', [1, 2, 16])->where('is_available', 1)->orderBy('reorder_id')->where('is_activate', '1')->get();
+            $getpaymentmethods = Payment::select('id', 'unique_identifier', 'environment', 'payment_name', 'payment_type', 'currency', 'public_key', 'secret_key', 'encryption_key', 'image')->whereIn('payment_type', [1, 17, 16])->where('is_available', 1)->orderBy('reorder_id')->where('is_activate', '1')->get();
         } else {
             $getaddresses = array();
             $getcartlist = Cart::where('session_id', Session::getId())->where('buynow', $buynow)->orderByDesc('id')->get();
-            $getpaymentmethods = Payment::select('id', 'unique_identifier', 'environment', 'payment_name', 'payment_type', 'currency', 'public_key', 'secret_key', 'encryption_key', 'image')->whereIn('payment_type', [1, 16])->where('is_available', 1)->orderBy('reorder_id')->where('is_activate', '1')->get();
+            $getpaymentmethods = Payment::select('id', 'unique_identifier', 'environment', 'payment_name', 'payment_type', 'currency', 'public_key', 'secret_key', 'encryption_key', 'image')->whereIn('payment_type', [1, 17, 16])->where('is_available', 1)->orderBy('reorder_id')->where('is_activate', '1')->get();
         }
         $producttax = 0;
         $tax_name = [];
@@ -168,7 +168,7 @@ class CheckoutController extends Controller
     {
         // This endpoint creates orders directly. Gateway payments are finalized only
         // by their verified callback (Barion has its own controller).
-        if (!in_array((int) $request->input('transaction_type'), [1, 2], true)) {
+        if (!in_array((int) $request->input('transaction_type'), [1, 2, 17], true)) {
             return response()->json(['status' => 0, 'message' => 'Ez a fizetési mód itt nem használható.'], 403);
         }
         if ((int) $request->input('transaction_type') === 2 && !(Auth::check() && Auth::user()->type == 2)) {
@@ -217,7 +217,7 @@ class CheckoutController extends Controller
 // ===========================================================================
 
 
-            if ($request->transaction_type == 1 || $request->transaction_type == 2 || $request->transaction_type == 3 || $request->transaction_type == 4 || $request->transaction_type == 5 || $request->transaction_type == 6) {
+            if (in_array((int) $request->transaction_type, [1, 2, 3, 4, 5, 6, 17], true)) {
 
                 $address = $request->address;
                 $address_type = $request->address_type;
@@ -300,7 +300,7 @@ class CheckoutController extends Controller
                 ->where('is_activate', 1)->where('is_available', 1)->exists()) {
                 return response()->json(['status' => 0, 'message' => 'A választott fizetési mód nem elérhető.'], 200);
             }
-            if (in_array((int) $transaction_type, [1, 2], true) && !$request->boolean('terms')) {
+            if (in_array((int) $transaction_type, [1, 2, 17], true) && !$request->boolean('terms')) {
                 return response()->json(['status' => 0, 'message' => 'Az ÁSZF és az adatkezelési tájékoztató elfogadása szükséges.'], 200);
             }
             $timing = OrderTiming::resolve((string) $request->input('schedule_mode', 'scheduled'), $delivery_date, $delivery_time, helper::appdata());
@@ -343,7 +343,7 @@ class CheckoutController extends Controller
             if ($transaction_type == "") {
                 return response()->json(['status' => 0, 'message' => trans('messages.transaction_type_required')], 200);
             }
-            if ($transaction_type != 1 && $transaction_type != 2 && $transaction_type != 4) {
+            if (!in_array((int) $transaction_type, [1, 2, 4, 17], true)) {
                 if ($transaction_id == "") {
                     return response()->json(['status' => 0, 'message' => trans('messages.transaction_id_required')], 200);
                 }
@@ -451,20 +451,22 @@ class CheckoutController extends Controller
                 $order->discount_amount = helper::number_format(0);
             }
             $order->transaction_type = $transaction_type;
-            if ($transaction_type != 1 && $transaction_type != 2 ) {
+            if (!in_array((int) $transaction_type, [1, 2, 17], true)) {
                 $order->transaction_id = $transaction_id;
             }
             $order->tax_amount = $tax;
             $order->tax_name = $tax_name;
             $order->delivery_charge = helper::number_format($delivery_charge);
             $order->grand_total = helper::number_format($grand_total);
-            $order->order_notes = $order_notes;
+            $order->order_notes = (int) $transaction_type === 17
+                ? trim((string) $order_notes . "\nFizetés átvételkor: bankkártyával (POS terminál).")
+                : $order_notes;
             $order->order_from = "web";
             $order->status = $defaultsatus->id;
             $order->status_type = $defaultsatus->type;
             $order->delivery_date = $delivery_date;
             $order->delivery_time = $delivery_time;
-            if ($transaction_type  == 1) {
+            if (in_array((int) $transaction_type, [1, 17], true)) {
                 $order->payment_status = 1;
             } else {
                 $order->payment_status = 2;

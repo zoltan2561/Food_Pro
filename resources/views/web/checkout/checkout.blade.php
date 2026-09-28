@@ -861,6 +861,7 @@
             });
             document.querySelectorAll('input[name="order_type"]').forEach(input =>
                 input.addEventListener('change', syncFulfillment));
+            window.addEventListener('pageshow', syncFulfillment);
             matchAreaToCity();
             fillCityFromAddress();
             syncFulfillment();
