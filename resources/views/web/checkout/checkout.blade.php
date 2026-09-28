@@ -670,7 +670,7 @@
     @if ($getpaymentmethods->contains('payment_type', 6))
         <script src="https://js.paystack.co/v1/inline.js"></script>
     @endif
-    <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/checkout.js') }}"></script>
+    <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/checkout.js') }}?v={{ filemtime(public_path('web-assets/js/custom/checkout.js')) }}"></script>
     <link rel="stylesheet" href="{{ asset('web-assets/css/flatpickr/flatpickr.min.css') }}">
     <script src="{{ asset('web-assets/js/flatpickr/flatpickr.min.js') }}"></script>
     <script>

@@ -404,7 +404,7 @@
         var siteurl = "{{ URL::to('/') }}";
     </script>
     <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/top_deals.js') }}"></script>
-    <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/common.js') }}"></script><!-- web-common-js -->
+    <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/common.js') }}?v={{ filemtime(public_path('web-assets/js/common.js')) }}"></script><!-- web-common-js -->
 
     @if (@helper::checkaddons('sales_notification'))
         @if (helper::appdata()->fake_sales_notification == 1)
