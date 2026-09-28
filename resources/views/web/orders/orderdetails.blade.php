@@ -28,7 +28,25 @@
                     </div>
                 @endif
                 <div class="{{ Auth::user() && Auth::user()->type == 2 ? 'col-lg-9' : 'col-lg-12' }} ">
-                    <div class="user-content-wrapper">
+                    <div class="user-content-wrapper order-tracking-details">
+                        @php
+                            $statusType = (int) $orderdata->status_type;
+                            $statusName = optional(helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type))->name ?: trans('labels.status');
+                            $statusTone = match ($statusType) {
+                                1 => 'placed',
+                                2 => 'progress',
+                                3 => 'completed',
+                                4 => 'cancelled',
+                                default => 'unknown',
+                            };
+                            $statusIcon = match ($statusType) {
+                                1 => 'fa-receipt',
+                                2 => 'fa-clock',
+                                3 => 'fa-circle-check',
+                                4 => 'fa-circle-xmark',
+                                default => 'fa-circle-info',
+                            };
+                        @endphp
                         <div class="d-flex flex-wrap gap-2 mb-3 border-bottom pb-3 align-items-center justify-content-between">
                             <p class="title mb-0">{{ trans('labels.order_details') }}</p>
                             <div class="">
@@ -50,6 +68,17 @@
                                       @endif --}}
 
                             </div>
+                        </div>
+                        <div class="order-tracking-status order-tracking-status--{{ $statusTone }}" role="status" aria-labelledby="order-tracking-status-title order-tracking-status-value">
+                            <span class="order-tracking-status-icon" aria-hidden="true"><i class="fa-solid {{ $statusIcon }}"></i></span>
+                            <div class="order-tracking-status-copy">
+                                <span class="order-tracking-status-label" id="order-tracking-status-title">{{ trans('labels.order_status') }}</span>
+                                <strong class="order-tracking-status-name" id="order-tracking-status-value">{{ $statusName }}</strong>
+                                <span class="order-tracking-status-number">#{{ $orderdata->order_number }}</span>
+                            </div>
+                            <a class="order-tracking-refresh" href="{{ route('order-details', ['order_number' => $orderdata->order_number]) }}">
+                                <i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Állapot frissítése
+                            </a>
                         </div>
                         <div class="row mb-5 g-3">
                             <div class="col-md-6">
@@ -88,31 +117,10 @@
                                             <p class="fw-400 fs-7 text-muted mb-2">{{ helper::order_time($orderdata->delivery_time) }}</p>
                                         </div>
                                         <div class="d-flex">
-                                            <p class="fw-semibold fs-7 mb-2">{{ trans('labels.order_status') }} : </p>&nbsp;
-                                            @if ($orderdata->status_type == '1')
-                                                <p class="text-order-placed mb-1 fw-500 fs-7">
-                                                    {{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? '-' : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}
-                                                </p>
-                                            @elseif($orderdata->status_type == '2')
-                                                <p class="text-order-waitingpickup mb-1 fw-500 fs-7">
-                                                    {{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? '-' : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}
-                                                </p>
-                                            @elseif($orderdata->status_type == '3')
-                                                <p class="text-order-completed mb-1 fw-500 fs-7">
-                                                    {{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? '-' : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}
-                                                </p>
-                                            @elseif($orderdata->status_type == '4')
-                                                <p class="text-order-cancelled mb-1 fw-500 fs-7">
-                                                    {{ @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name == null ? '-' : @helper::gettype($orderdata->status, $orderdata->status_type, $orderdata->order_type)->name }}
-                                                </p>
-                                            @endif
-
-                                        </div>
-                                        <div class="d-flex">
                                             <p class="fw-semibold fs-7 mb-2">{{ trans('labels.payment_type') }} : </p>&nbsp;
                                             <p class="fw-400 fs-7 text-muted mb-2">
                                                 {{ helper::getpayment($orderdata->transaction_type) }}
-                                                @if (!in_array($orderdata->transaction_type, [1, 2, 15]))
+                                                @if (!in_array((int) $orderdata->transaction_type, [1, 2, 15, 17], true) && filled($orderdata->transaction_id))
                                                     [{{ $orderdata->transaction_id }}]
                                                 @endif
                                             </p>
@@ -197,7 +205,7 @@
                             </div>
                         </div>
                         <div class="table-responsive border-top">
-                            <table class="table">
+                            <table class="table order-tracking-table">
                                 <thead>
                                     <tr>
                                         <th>{{ trans('labels.image') }}</th>
@@ -216,11 +224,11 @@
                                     $addonstotal = $orders->addons_total_price + $orders['extras_total_price'];
                                 ?>
                                     <tr>
-                                        <td><img src="{{ helper::image_path($orders->item_image) }}" class="rounded hw-50"
-                                                alt=""></td>
+                                        <td><img src="{{ helper::image_path($orders->item_image) }}" class="order-tracking-product-image"
+                                                alt="{{ $orders->item_name }}" width="64" height="64" loading="lazy"></td>
                                         <td>
                                             <img @if ($orders['item_type'] == 1) src="{{ helper::image_path('veg.svg') }}" @else src="{{ helper::image_path('nonveg.svg') }}" @endif
-                                                class="item-type-img" alt="">
+                                                class="order-tracking-food-type" alt="" width="16" height="16">
                                             <span class="fs-7">{{ $orders->item_name }}</span>
                                             @foreach ($orders->addon_selections as $name)
                                                 <small class="d-block text-success">+ {{ $name }}</small>
