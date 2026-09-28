@@ -24,6 +24,8 @@ domains/foodpro.shop/
 └── public_html/       # a foodpro-app/public tartalma, majd a Hostinger index.php
 ```
 
+Ha egy korábbi Git-telepítés a teljes repót közvetlenül a `public_html` mappába tette, a gyökér `.htaccess` átmenetileg a `/web-assets`, `/admin-assets` és `/foodpro-assets` kéréseket a `public/` alatti fájlokra irányítja. Így a CSS és a képek betöltődnek, de az éles elrendezést a fenti kétmappás szerkezetre kell rendezni, hogy az alkalmazáskód a webgyökéren kívül legyen.
+
 1. A hPanelben add hozzá a `foodpro.shop` domaint, irányítsd rá a DNS-t, hozz létre külön MySQL-adatbázist és felhasználót, kapcsold be az SSH-t, és telepíts SSL-t. Az SSL lapon legyen bekapcsolva a [**Force HTTPS**](https://support.hostinger.com/en/articles/1583201-how-to-enable-or-disable-https-for-your-website-at-hostinger). Egyetlen kanonikus domaint használj; az alábbi példa a `www` nélküli címet használja.
 2. Új telepítésnél a domain könyvtárában futtasd az alábbi parancsokat. Ha a `public_html` már tartalmaz webhelyet vagy feltöltéseket, előbb készíts mentést, és a másolást ahhoz igazítsd. A `public_html` könyvtárat ne töröld.
 

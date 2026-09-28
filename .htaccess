@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Compatibility when an existing host points its web root at this project.
+    # Only public asset directories are mapped; private vendor files stay denied.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^((?:admin-assets|web-assets|foodpro-assets|installer|vendor/myfatoorah)/.+)$ public/$1 [L]
+
     # Fallback protection for local servers pointed at the repository root.
     # Production must serve only public_html (see README.md).
     RewriteRule ^(?:app|bootstrap|config|cron|database|deploy|node_modules|resources|routes|storage|tests|vendor|\.git)(?:/|$) - [F,NC,L]
