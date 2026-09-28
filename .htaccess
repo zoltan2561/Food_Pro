@@ -8,6 +8,7 @@
     # Fallback protection for local servers pointed at the repository root.
     # Production must serve only public_html (see README.md).
     RewriteRule ^(?:app|bootstrap|config|cron|database|deploy|node_modules|resources|routes|storage|tests|vendor|\.git)(?:/|$) - [F,NC,L]
+    RewriteRule ^(?:index\.php/)?(?:install|update)(?:/|$) - [F,NC,L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

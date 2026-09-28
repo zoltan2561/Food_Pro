@@ -9,6 +9,9 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+    # Installation and database updates are performed with Artisan, not over HTTP.
+    RewriteRule ^(?:index\.php/)?(?:install|update)(?:/|$) - [F,NC,L]
+
     # Only the Laravel front controller may execute PHP.
     RewriteRule ^index\.php$ - [L]
     RewriteRule \.(?:php[0-9]?|phtml|pht|phar)(?:\.|/|$) - [F,NC,L]
