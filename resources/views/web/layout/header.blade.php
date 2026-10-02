@@ -6,14 +6,14 @@
             <div class="container navbar-container">
                 <a class="navbar-brand" href="{{ route('home') }}">
                     <img class="img-resposive img-fluid" src="{{ helper::image_path(@helper::appdata()->logo) }}"
-                         alt="logo">
+                         alt="{{ $siteSettings->website_title ?? $siteSettings->title ?? config('app.name') }}">
                 </a>
                 <!-- language-btn -->
                 @if (@helper::checkaddons('language'))
                     <div class="buttons d-flex align-items-center">
                         <div class="dropdown d-block d-lg-none">
                             <a class="btn text-white dropdown px-1 fs-6 border-0 header-box" type="button"
-                               id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                               id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ trans('labels.language') }}">
                                 <i class="fa-solid fa-globe fs-5"></i></a>
                             <ul class="dropdown-menu {{ session()->get('direction') == '2' ? 'min-dropdown-rtl' : 'min-dropdown' }}"
                                 aria-labelledby="dropdownMenuButton1">
@@ -34,7 +34,11 @@
                 <!-- language-btn -->
 
                 {{-- for large devices - for header bar --}}
-                <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse"
+                <a href="{{ route('cart') }}" class="storefront-mobile-cart d-lg-none" aria-label="{{ trans('labels.cart') }}">
+                    <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+                    <span class="cart-badge js-cart-count">{{ helper::get_user_cart() }}</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#foodProNavigation" aria-controls="foodProNavigation"
                     aria-expanded="false" aria-label="{{ trans('labels.open_menu') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -75,39 +79,29 @@
                                 </ul>
                             </div>
                         @endif
-                        <div class="header-search header-box">
-                            <input type="text" class="search-form" placeholder="{{ trans('labels.search_here') }}"
-                                   required>
-                            @if (session()->get('direction') == '')
-                                <a href="{{ route('search') }}" class="search-button">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </a>
-                            @elseif (session()->get('direction') == '2')
-                                <a href="{{ route('search') }}" class="search-button">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </a>
-                            @else
-                                <a href="{{ route('search') }}" class="search-button">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </a>
-                            @endif
-                        </div>
+                        <form class="header-search header-box" action="{{ route('search') }}" method="get" role="search">
+                            <input type="search" name="itemname" class="search-form" placeholder="{{ trans('labels.search_here') }}"
+                                   aria-label="{{ trans('labels.search') }}" enterkeyhint="search" required>
+                            <button type="submit" class="search-button border-0 bg-transparent" aria-label="{{ trans('labels.search') }}">
+                                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            </button>
+                        </form>
                         <!-- cart-btn -->
                         <div class="cart-area header-box">
-                            <a href="{{ route('cart') }}" class="text-white">
+                            <a href="{{ route('cart') }}" class="text-white" aria-label="{{ trans('labels.cart') }}">
                                 <i class="fa-solid fa-cart-shopping"></i>
-                                <span class="cart-badge">{{ helper::get_user_cart() }}</span>
+                                <span class="cart-badge js-cart-count">{{ helper::get_user_cart() }}</span>
                             </a>
                         </div>
 
                         <!-- user-btn -->
                         <div class="header-box ">
                             @if (Auth::user() && Auth::user()->type == 2)
-                                <a class="nav-link text-white" href="{{ route('user-profile') }}" role="button">
+                                <a class="nav-link text-white" href="{{ route('user-profile') }}" aria-label="{{ trans('labels.account') }}">
                                     <i class="fa-solid fa-user"></i>
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="text-white"><i class="fa-solid fa-user"></i></a>
+                                <a href="{{ route('login') }}" class="text-white" aria-label="{{ trans('labels.account') }}"><i class="fa-solid fa-user"></i></a>
                             @endif
                         </div>
                     </div>
@@ -195,16 +189,18 @@
 </div>
 <!-- offer btn end-->
 
-<div class="mobile_menu_footer d-lg-none">
+@php($mobileLinks = \App\Support\SiteNavigation::links('mobile', $siteSettings ?? null))
+@if (count($mobileLinks) > 0)
+<nav class="mobile_menu_footer d-lg-none" aria-label="{{ trans('labels.mobile_navigation') }}">
     <div class="container">
         <ul class="d-flex justify-content-between align-items-center mb-0 gap-3">
-            @foreach (\App\Support\SiteNavigation::links('mobile', $siteSettings ?? null) as $link)
+            @foreach ($mobileLinks as $link)
                 <li class="text-center">
                     <a href="{{ $link['url'] }}" class="{{ $link['active'] ? 'active1' : '' }}" {{ $link['active'] ? 'aria-current=page' : '' }}>
                         <span class="position-relative">
                             <i class="fa-solid {{ $link['icon'] }}" aria-hidden="true"></i>
                             @if ($link['key'] === 'cart')
-                                <span class="qut_counter">{{ helper::get_user_cart() }}</span>
+                                <span class="qut_counter js-cart-count">{{ helper::get_user_cart() }}</span>
                             @endif
                         </span>
                         <span class="mobile-nav-label">{{ $link['label'] }}</span>
@@ -213,4 +209,5 @@
             @endforeach
         </ul>
     </div>
-</div>
+</nav>
+@endif

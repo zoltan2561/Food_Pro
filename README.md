@@ -2,6 +2,12 @@
 
 Testreszabható, Laravel 9 alapú éttermi rendelési felület kis éttermek számára. A kezdő adatbázis régi mintatételeit a demófeltöltő kikapcsolja, és 19 aktív ételt, italt hagy hat kategóriában. Korábbi vásárlókat, rendeléseket és fizetési kulcsokat a kezdő SQL nem tartalmaz.
 
+## Rendszerelemzés és mobilos vevőoldal
+
+A [2026. október 2-i rendszerelemzés](docs/RENDSZERELEMZES.md) a vevőoldalt, admint, rendelést, fizetést, adatmodellt és üzemeltetést vizsgálja, forráshivatkozásokkal és javítási sorrenddel. Az éles bevezetés előtt a jelentés P0/P1 megállapításait rendezni kell.
+
+A vevőoldal új mobilos kategóriasávot, közvetlen keresőt, kompakt ételkártyákat, nagyobb érintési célokat, javított termékmodalt és azonnal frissülő kosárjelzőket kapott. A reszponzív és böngészős próbák, valamint képernyőképek a jelentés végén találhatók.
+
 ## Helyi telepítés XAMPP alatt
 
 1. Másold a projektet a `C:\xampp\htdocs\Food_Pro` mappába, és indítsd el az Apache és MySQL szolgáltatást.

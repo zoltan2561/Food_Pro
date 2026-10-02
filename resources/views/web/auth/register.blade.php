@@ -6,7 +6,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <title> {{ @helper::appdata()->title }} | {{ trans('labels.signup') }} </title>
     <link rel="icon" href="{{ helper::image_path(@helper::appdata()->favicon) }}"><!-- Favicon -->
     <link rel="stylesheet" href="{{ url(env('ASSETSPATHURL') . 'web-assets/css/bootstrap.min.css') }}">
@@ -25,9 +25,10 @@
             --bs-secondary: {{ helper::appdata()->web_secondary_color != null ? helper::appdata()->web_secondary_color : '#FFC344' }};
         }
     </style>
+    <link rel="stylesheet" href="{{ url(env('ASSETSPATHURL') . 'foodpro-assets/storefront.css') }}?v={{ filemtime(public_path('foodpro-assets/storefront.css')) }}">
 </head>
 
-<body>
+<body data-storefront-page="{{ request()->route()?->getName() }}">
     <main>
         <div class="img-fluid">
             <!-- Sticky Background Image -->

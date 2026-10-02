@@ -147,6 +147,7 @@
                                                    class="form-control"
                                                    name="first_name"
                                                    id="first_name"
+                                                   autocomplete="given-name"
                                                    placeholder="{{ trans('labels.first_name') }}"
                                                    value="{{ $firstPrefill }}"
                                                    required>
@@ -158,6 +159,7 @@
                                                    class="form-control"
                                                    name="last_name"
                                                    id="last_name"
+                                                   autocomplete="family-name"
                                                    placeholder="{{ trans('labels.last_name') }}"
                                                    value="{{ $lastPrefill }}"
                                                    required>
@@ -218,7 +220,7 @@
                                         {{-- Lakcím --}}
                                         <div class="col-12">
                                             <label for="new_address" class="form-label">{{ trans('labels.address') }} <span class="text-danger">*</span></label>
-                                             <textarea name="address" id="new_address" class="form-control" rows="2" placeholder="{{ trans('labels.address_details_placeholder') }}" @if ($initialDelivery) required @else disabled @endif>{{ old('address') }}</textarea>
+                                             <textarea name="address" id="new_address" class="form-control" rows="2" autocomplete="street-address" placeholder="{{ trans('labels.address_details_placeholder') }}" @if ($initialDelivery) required @else disabled @endif>{{ old('address') }}</textarea>
                                         </div>
                                              {{-- The zone name can cover several towns, so the buyer enters the city. --}}
                                             <div class="col-md-6">

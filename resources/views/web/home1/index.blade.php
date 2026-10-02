@@ -10,7 +10,7 @@
                 <div class="carousel-inner">
                     @foreach ($sliders as $key => $sliderdata)
                         <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
-                            <img src="{{ helper::image_path($sliderdata->image) }}" class="d-block img-fluid" alt="slider">
+                            <img src="{{ helper::image_path($sliderdata->image) }}" class="d-block img-fluid" alt="" @if ($loop->first) fetchpriority="high" @else loading="lazy" @endif>
                             <div class="carousel-caption d-flex h-100 align-items-center justify-content-center flex-column">
                                 <h5 class="animate__animated animate__fadeInUp">{{ $sliderdata->title }}</h5>
                                 <p class="animate__animated animate__fadeInUp">{{ $sliderdata->description }}</p>
@@ -45,6 +45,8 @@
         </section>
     @endif
     <!-- Slider Area End Here -->
+    @include('web.partials.quick-start')
+    @include('web.partials.category-navigation')
 
     <!-- Promotional topbanners Start Here -->
     @if (count($banners['topbanners']) > 0)
@@ -352,7 +354,7 @@
                 </div>
                 <div class="row g-4 home-special-grid">
                     @foreach ($todayspecial as $itemdata)
-                        @include('web.home1.todayitemview')
+                        @include('web.home1.itemview', ['itemColumnClass' => 'col-lg-6 col-md-6 col-12'])
                     @endforeach
                 </div>
             </div>
@@ -412,7 +414,7 @@
                 </div>
                 <div class="row g-4 home-recommended-grid">
                     @foreach ($recommended as $itemdata)
-                        @include('web.home1.recommendeditemview')
+                        @include('web.home1.itemview')
                     @endforeach
                 </div>
             </div>

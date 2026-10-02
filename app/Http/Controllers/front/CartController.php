@@ -181,6 +181,7 @@ class CartController extends Controller
                 'status' => 1,
                 'message' => trans('messages.success'),
                 'data' => $total_count,
+                'cart_quantity' => helper::get_user_cart(),
                 'total_item_count' => helper::get_item_cart($itemdata->id),
                 'buynow' => $buynow
             ], 200);

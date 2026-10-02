@@ -1,9 +1,9 @@
-<div class="col-xl-4 col-lg-4 col-sm-6 col-xs-auto reveal">
-    <div class="card rounded-4 overflow-hidden h-100">
+<div class="{{ $itemColumnClass ?? 'col-xl-4 col-lg-4 col-sm-6 col-12' }} reveal">
+    <div class="card storefront-item-card rounded-4 overflow-hidden h-100">
         <a href="{{ URL::to('item-' . $itemdata->slug) }}">
             <div class="card-image">
                 <img src="{{ @helper::image_path($itemdata['item_image']->image_name) }}"
-                    class="card-img-top border-0 rounded-0 rounded-top position-relative" alt="dishes">
+                    class="card-img-top border-0 rounded-0 rounded-top position-relative" loading="lazy" decoding="async" alt="{{ $itemdata->item_name }}">
             </div>
         </a>
         <div class="card-body pb-0 border-bottom">
@@ -11,15 +11,17 @@
                 <div class="cat-name py-1 px-2 col-auto text-center">
                     <span>{{ $itemdata['category_info']->category_name }}</span>
                 </div>
-                <div class="">
+                @if ($itemdata->avg_ratting > 0)
+                <div>
                     <div class="d-flex fs-8 align-items-center">
                         <i class="fa-solid fa-star text-warning"></i>
                         <p class="m-0 text-dark fw-500 {{ session()->get('direction') == '2' ? 'pe-1' : 'ps-1' }}">
                             {{ number_format($itemdata->avg_ratting, 1) }}</p>
                     </div>
                 </div>
+                @endif
             </div>
-            <h5 class="item-card-title pb-3 fs-6 d-flex">
+            <div class="item-card-title pb-3 fs-6 d-flex">
                 @if ($itemdata->item_type == 1)
                     <img src="{{ helper::image_path('veg.svg') }}" alt=""
                         class="{{ session()->get('direction') == '2' ? 'ms-1' : 'me-1' }}">
@@ -29,20 +31,20 @@
                 @endif
                 <div class="d-flex align-items-center gap-1">
                     <a href="{{ URL::to('item-' . $itemdata->slug) }}">
-                        <p class="item-card-title mb-0 line-2 fs-7">
+                        <h2 class="item-card-title mb-0 line-2 fs-7">
                             {{ $itemdata->item_name }}
-                        </p>
+                        </h2>
                     </a>
                     @if ($itemdata->item_allergens != null)
-                        <div type="button"
+                        <button type="button" class="storefront-allergen-button border-0 bg-transparent" aria-label="{{ trans('labels.allergens') }}: {{ $itemdata->item_name }}"
                             onclick="itemsallergens('{{ $itemdata->id }}','{{ route('get_item_allergens') }}')">
-                            <div class="btn-info">
+                            <span class="btn-info">
                                 <i class="fa-solid fa-info"></i>
-                            </div>
-                        </div>
+                            </span>
+                        </button>
                     @endif
                 </div>
-            </h5>
+            </div>
         </div>
         @php
             if ($itemdata->is_top_deals == 1 && $topdeals != null) {
@@ -80,10 +82,11 @@
                 @if ($itemdata->is_cart == 1)
                     <div class="item-quantity py-1 px-5">
                         <button type="button" class="btn btn-sm  fw-500"
+                            aria-label="{{ trans('labels.goto_cart') }}"
                             onclick="removefromcart('{{ URL::to('/cart') }}','{{ trans('messages.remove_cartitem_note') }}','{{ trans('labels.goto_cart') }}')">-</button>
                         <input class="fw-500 item-total-qty-{{ $itemdata->slug }}" type="text"
                             value="{{ helper::get_item_cart($itemdata->id) }}" disabled />
-                        <button class="btn btn-sm fw-500 border-0"
+                        <button type="button" class="btn btn-sm fw-500 border-0" aria-label="{{ trans('labels.add') }}: {{ $itemdata->item_name }}"
                             onclick="showitem('{{ $itemdata->slug }}','{{ URL::to('/show-item') }}')">+</button>
                     </div>
                 @else

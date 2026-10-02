@@ -4,6 +4,7 @@
 @endsection
 @section('content')
     @if (!empty($categorydata))
+        @include('web.partials.category-navigation')
         <div class="breadcrumb-sec mb-3">
             <div class="container">
                 <div class="breadcrumb-sec-content">
@@ -20,7 +21,7 @@
 
                             {{-- Aktuális kategória neve --}}
                             <li class="breadcrumb-item active" aria-current="page">
-                                {{ $currentCategory->category_name ?? \Illuminate\Support\Str::headline(str_replace('-', ' ', request('category'))) }}
+                                {{ $categorydata->category_name }}
                             </li>
                         </ol>
 
@@ -30,6 +31,10 @@
         </div>
         <section class="menu-section">
             <div class="container">
+                <div class="storefront-menu-heading py-3">
+                    <h1 class="h3 fw-bold mb-1">{{ $categorydata->category_name }}</h1>
+                    <p class="text-muted mb-0">{{ $getitemlist->total() }} {{ trans('labels.item') }}</p>
+                </div>
                 <div class="row">
                     <div class="filter-sidebar mb-3">
                         <div class="sidebar-wrap" id="style-3">

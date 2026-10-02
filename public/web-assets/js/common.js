@@ -119,7 +119,9 @@
                 window.location.href = siteurl + '/checkout?buynow=1';
                 return;
             }
-            document.querySelectorAll('.qut_counter, .js-cart-count').forEach(node => { node.textContent = result.data; });
+            const cartQuantity = result.cart_quantity ?? result.data;
+            document.querySelectorAll('.qut_counter, .js-cart-count').forEach(node => { node.textContent = cartQuantity; });
+            document.dispatchEvent(new CustomEvent('storefront:cart-updated', { detail: { count: cartQuantity } }));
             bootstrap.Modal.getInstance(document.getElementById('modalitemdetails'))?.hide();
             success('A termék a kosárba került.');
         } catch (error) { notice(error.message); }

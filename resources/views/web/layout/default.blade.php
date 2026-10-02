@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta property="og:title" content="{{ @helper::appdata()->og_title }}" />
     <meta property="og:description" content="{{ @helper::appdata()->og_description }}" />
     <meta property="og:image" content='{{ helper::image_path(@helper::appdata()->og_image) }}' />
@@ -47,36 +47,31 @@
             --foodpro-gold: {{ helper::appdata()->web_secondary_color != null ? helper::appdata()->web_secondary_color : '#efb365' }};
         }
     </style>
+    <link rel="stylesheet" href="{{ url(env('ASSETSPATHURL') . 'foodpro-assets/storefront.css') }}?v={{ filemtime(public_path('foodpro-assets/storefront.css')) }}">
     @yield('styles')
 </head>
 
-<body>
+<body data-storefront-page="{{ request()->route()?->getName() }}">
+    <a class="storefront-skip-link" href="#storefront-content">{{ trans('labels.skip_to_content') }}</a>
     <main id="main-content" class="">
         <div class="wrapper">
             <input type="hidden" name="hdnsession" id="hdnsession" value="{{ session()->get('direction') }}">
             @include('web.layout.header')
-            <div class="content-wrapper">
+            <div class="content-wrapper" id="storefront-content" tabindex="-1">
                 @yield('content')
                 @include('web.layout.footer')
             </div>
 
             <!-- index CART item modal -->
             @if (request()->routeIs('home', 'categories', 'menu', 'search', 'itemdetails', 'viewall'))
-                @if (helper::get_user_cart() != 0)
-                    <div class="cart-modal rounded-bottom-0">
-                        <div class="rounded-lg">
-                            <div class="d-flex gap-3 justify-content-between align-items-center">
-                                <p class="mb-0 text-white fs-7 fw-600 d-flex align-items-center gap-1"><span
-                                        class="count">{{ helper::get_user_cart() }}</span>
-                                    {{ trans('labels.item_added') }} </p>
-                                <a href="{{ route('cart') }}" class="text-white fw-500 fs-7 text-uppercase">
-                                    {{ trans('labels.view') }} {{ trans('labels.cart') }}
-                                    <i class="fa-solid fa-bag-shopping ps-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                @endif
+                <div class="cart-modal" @if (helper::get_user_cart() == 0) hidden @endif>
+                    <a href="{{ route('cart') }}" class="storefront-cart-link">
+                        <span class="storefront-cart-copy"><i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
+                            <span><strong class="js-cart-count">{{ helper::get_user_cart() }}</strong> {{ trans('labels.item_added') }}</span>
+                        </span>
+                        <span class="storefront-cart-action">{{ trans('labels.goto_cart') }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+                    </a>
+                </div>
             @endif
 
             {{-- cookie modal --}}
@@ -86,7 +81,7 @@
     </main>
 
     <!-- Modal Item Details -->
-    <div class="modal modalitemdetails" id="modalitemdetails" tabindex="-1" aria-labelledby="exampleModalLabel"
+    <div class="modal modalitemdetails" id="modalitemdetails" tabindex="-1" aria-label="{{ trans('labels.item_details') }}"
         aria-hidden="true">
         <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content" id="modalitem_body">
@@ -405,6 +400,7 @@
     </script>
     <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/custom/top_deals.js') }}"></script>
     <script src="{{ url(env('ASSETSPATHURL') . 'web-assets/js/common.js') }}?v={{ filemtime(public_path('web-assets/js/common.js')) }}"></script><!-- web-common-js -->
+    <script src="{{ url(env('ASSETSPATHURL') . 'foodpro-assets/storefront.js') }}?v={{ filemtime(public_path('foodpro-assets/storefront.js')) }}" defer></script>
 
     @if (@helper::checkaddons('sales_notification'))
         @if (helper::appdata()->fake_sales_notification == 1)
