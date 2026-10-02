@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}"
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ session('direction') == 2 ? 'rtl' : 'ltr' }}"
     data-admin-skin="{{ in_array(helper::appdata()->admin_skin ?? '', ['winter', 'spring', 'summer', 'autumn'], true) ? helper::appdata()->admin_skin : 'spring' }}">
 
 <head>
@@ -29,10 +29,11 @@
         }
     </style>
     <link rel="stylesheet" href="{{ asset('foodpro-assets/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('foodpro-assets/admin-ux.css') }}?v={{ filemtime(public_path('foodpro-assets/admin-ux.css')) }}">
     @yield('styles')
 </head>
 
-<body>
+<body data-admin-page="{{ request()->path() }}">
 {{-- @include('admin.theme.preloader') --}}
 <main>
     <div class="wrapper">
@@ -41,6 +42,7 @@
             @include('admin.theme.sidebar')
             <div class="{{ session()->get('direction') == 2 ? 'main-content-rtl' : 'main-content' }}">
                 <div class="page-content">
+                    @include('admin.partials.page-intro')
                     @yield('content')
                 </div>
             </div>
@@ -57,9 +59,7 @@
                         <p>{{ trans('messages.new_order_arrive') }}</p>
                     </div>
                     <div class="modal-footer flex-center">
-                        <a role="button" class="btn btn-outline-secondary-modal btn-primary waves-effect"
-                           onclick="window.location.reload();"
-                           data-bs-dismiss="modal">{{ trans('labels.okay') }}</a>
+                        <a class="btn btn-primary" href="{{ url('admin/orders') }}">{{ trans('admin_ui.new_orders_open') }}</a>
                     </div>
                 </div>
             </div>
@@ -244,7 +244,31 @@ const customOrderTone = @json(helper::appdata()->notification_tune && file_exist
 
 
 <script src="{{ asset('admin-assets/assets/js/jquery-ui/jquery-ui.min.js') }}"></script>
+<script>
+    if (window.jQuery && jQuery.fn.dataTable) {
+        jQuery.extend(true, jQuery.fn.dataTable.defaults, {
+            language: {
+                search: @json(trans('admin_ui.table_search')),
+                lengthMenu: @json(trans('admin_ui.table_length')),
+                info: @json(trans('admin_ui.table_info')),
+                infoEmpty: @json(trans('admin_ui.table_info_empty')),
+                infoFiltered: @json(trans('admin_ui.table_filtered')),
+                emptyTable: @json(trans('admin_ui.table_empty')),
+                zeroRecords: @json(trans('admin_ui.table_zero')),
+                paginate: {
+                    previous: @json(trans('admin_ui.table_previous')), next: @json(trans('admin_ui.table_next')),
+                    first: @json(trans('admin_ui.table_first')), last: @json(trans('admin_ui.table_last'))
+                },
+                aria: {
+                    sortAscending: @json(trans('admin_ui.table_sort_ascending')),
+                    sortDescending: @json(trans('admin_ui.table_sort_descending'))
+                }
+            }
+        });
+    }
+</script>
 <script src="{{ url(env('ASSETSPATHURL') . 'admin-assets/assets/js/common.js') }}"></script><!-- Common JS -->
+<script src="{{ asset('foodpro-assets/admin-ux.js') }}?v={{ filemtime(public_path('foodpro-assets/admin-ux.js')) }}" defer></script>
 @yield('script')
 </body>
 

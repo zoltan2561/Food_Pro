@@ -3,6 +3,14 @@
     @include('admin.breadcrumb')
     <div class="container-fluid">
         @include('admin.orders.statistics')
+        <p class="admin-status-legend">{{ trans('admin_ui.orders_legend') }}</p>
+        @if ($getorders->isEmpty())
+            <div class="admin-empty-state">
+                <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+                <h2 class="h5">{{ trans('admin_ui.orders_empty') }}</h2>
+                <p>{{ trans('admin_ui.orders_empty_help') }}</p>
+            </div>
+        @endif
         <div class="row">
             <div class="col-12">
                 <div class="card border-0">
@@ -20,13 +28,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">{{ trans('labels.payment') }}</h5>
+                    <h5 class="modal-title" id="paymentModalLabel">{{ trans('admin_ui.record_payment') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action=" {{ URL::to('admin/orders/payment_status-' . '2') }}" method="post"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
+                        <p class="admin-help-text">{{ trans('admin_ui.record_payment_help') }}</p>
                         <div>
                             <input type="hidden" id="booking_number" name="booking_number" value="">
                             <label for="modal_total_amount" class="form-label">

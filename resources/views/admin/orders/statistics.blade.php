@@ -1,4 +1,4 @@
-<div class="row g-3 my-3">
+<div class="row g-3 my-3 admin-order-statistics">
     <div class="col-xl-3 col-sm-6 col-12">
         <div
             class="card box-shadow h-100 {{ request()->is('admin/orders*') ? (request()->get('status') == '' ? 'border border-primary' : 'border-0') : 'border-0' }}">
@@ -67,7 +67,7 @@
                                 <i class="fa fa-close"></i>
                             </span>
                             <span class="text-end">
-                                <p class="fw-500 mb-1">{{ trans('labels.cancelled') }}</p>
+                                <p class="fw-500 mb-1">{{ trans('admin_ui.cancelled') }}</p>
                                 <h4>{{ $totalcancelled }}</h4>
                             </span>
                         </div>

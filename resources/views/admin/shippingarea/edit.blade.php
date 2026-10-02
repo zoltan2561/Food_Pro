@@ -4,11 +4,15 @@
     <div class="row mt-3">
         <div class="col-12">
             <div class="card border-0 box-shadow">
-                <div class="card-body">
+                <div class="card-body admin-form-section">
+                    <div class="admin-section-intro">
+                        <h2 class="h5">{{ trans('admin_ui.delivery_zone_title') }}</h2>
+                        <p>{{ trans('admin_ui.delivery_zone_intro') }}</p>
+                    </div>
                     <form action="{{ URL::to('/admin/shippingarea/update-' . $shippingareadata->id) }}" method="POST">
                         @csrf
                         <div class="row">
-                            <input type="hidden" name="id"value="{{ $shippingareadata->id }}">
+                            <input type="hidden" name="id" value="{{ $shippingareadata->id }}">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-label">{{ trans('labels.area_name') }}
@@ -16,6 +20,7 @@
                                     <input type="text" class="form-control" name="name"
                                         value="{{ $shippingareadata->name }}" placeholder="{{ trans('labels.area_name') }}"
                                         required>
+                                    <p class="admin-help-text">{{ trans('admin_ui.delivery_zone_name_help') }}</p>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">{{ trans('labels.delivery_charge') }}
@@ -23,6 +28,7 @@
                                     <input type="text" class="form-control numbers_only" name="delivery_charge"
                                         value="{{ $shippingareadata->delivery_charge }}"
                                         placeholder="{{ trans('labels.delivery_charge') }}" required>
+                                    <p class="admin-help-text">{{ trans('admin_ui.delivery_zone_price_help') }}</p>
                                 </div>
                             </div>
                             <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

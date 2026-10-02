@@ -2,29 +2,43 @@
 @section('content')
     @include('admin.breadcrumb')
     <div class="container-fluid">
+        @include('admin.partials.workspace-links')
         @if (Auth::user()->type == 1)
-            <div class="card border-0 box-shadow mb-4">
+            <details class="card border-0 box-shadow mb-4">
+                <summary class="p-3 fw-semibold">{{ trans('admin_ui.customize') }}</summary>
                 <div class="card-body p-4">
-                    <h4 class="mb-2">Bemutató tartalom szerkesztése</h4>
-                    <p class="text-muted mb-3">Az itt látható étterem mintatartalom. A bemutató előtt cseréld le a szövegeket, képeket, árakat és elérhetőségeket.</p>
+                    <p class="admin-help-text mb-3">{{ trans('admin_ui.customize_help') }}</p>
                     <div class="d-flex flex-wrap gap-2">
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/settings') }}">Név, logó, színek, lábléc</a>
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/slider') }}">Fő kép és címsor</a>
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/category') }}">Kategóriák</a>
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/item') }}">Ételek és fotók</a>
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/addongroup') }}">Feltétcsoportok</a>
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/addons') }}">Feltétek</a>
-                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/language-settings/hu') }}">Felületi szövegek</a>
-                        <a class="btn btn-primary btn-sm" href="{{ url('/') }}" target="_blank" rel="noopener">Weboldal megnyitása</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/settings') }}">{{ trans('admin_ui.branding') }}</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/slider') }}">{{ trans('admin_ui.sliders') }}</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/category') }}">{{ trans('admin_ui.categories') }}</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/item') }}">{{ trans('admin_ui.items') }}</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/addongroup') }}">{{ trans('admin_ui.addon_groups') }}</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/addons') }}">{{ trans('admin_ui.addons') }}</a>
+                        <a class="btn btn-outline-primary btn-sm" href="{{ url('admin/language-settings/hu') }}">{{ trans('admin_ui.language') }}</a>
+                        <a class="btn btn-primary btn-sm" href="{{ url('/') }}" target="_blank" rel="noopener">{{ trans('admin_ui.website_open') }}</a>
                     </div>
                 </div>
-            </div>
+            </details>
         @endif
         @if (Auth::user()->type == 1 || in_array(0, explode(',',helper::get_roles())))
             {{-- @include('admin.plugin') --}}
 
 
 
+            <div class="row">
+                {{-- todays-orders --}}
+                <div class="col-12 mb-3">
+                    <div class="card border-0 box-shadow h-100">
+                        <div class="card-body">
+                            <h5 class="card-title border-bottom pb-3 mb-3">{{ trans('labels.today_order') }}</h5>
+                            <div class="table-responsive" id="table-display">
+                                @include('admin.orders.orderstable')
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-md-12">
                     <div class="row">
@@ -200,17 +214,6 @@
                 </div>
             </div>
             <div class="row">
-                {{-- todays-orders --}}
-                <div class="col-12 mb-3">
-                    <div class="card border-0 box-shadow h-100">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-3 mb-3">{{ trans('labels.today_order') }}</h5>
-                            <div class="table-responsive" id="table-display">
-                                @include('admin.orders.orderstable')
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 {{-- top items --}}
                 <div class="col-md-6 mb-3">
                     <div class="card border-0 box-shadow h-100">

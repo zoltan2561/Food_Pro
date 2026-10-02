@@ -5,7 +5,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="card border-0">
-                    <div class="card-body">
+                    <div class="card-body admin-form-section">
+                        <div class="admin-section-intro">
+                            <h2 class="h5">{{ trans('admin_ui.payment_title') }}</h2>
+                            <p>{{ trans('admin_ui.payment_intro') }}</p>
+                        </div>
                         <div class="accordion accordion-flush sort_menu" id="accordionExample"
                             data-url="{{ url('admin/payment/reorder_payment') }}">
                             @php
@@ -39,7 +43,7 @@
                                         <div class="payment-accordian card rounded border mb-3 handle">
                                             <h6 class="card-header text-white d-flex align-items-center rounded border-0 justify-content-between"
                                                 id="heading{{ $transaction_type }}">
-                                                <div>
+                                                <span>
                                                     <img src="{{ helper::image_path($pmdata->image) }}" alt=""
                                                         class="img-fluid rounded mx-2" height="30" width="30">
                                                     <b>{{ $pmdata->payment_name }}</b>
@@ -51,7 +55,7 @@
                                                         @endif
                                                     @endif
 
-                                                </div>
+                                                </span>
                                                 <a class="cursor-pointer" tooltip="{{ trans('labels.move') }}">
                                                     <i class="fa-light fa-up-down-left-right text-white"></i></a>
                                             </h6>
@@ -65,6 +69,7 @@
                                                         <input type="text" class="form-control" name="name"
                                                             placeholder="{{ trans('labels.payment_name') }}"
                                                             value="{{ $pmdata->payment_name }}" required>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.payment_name_help') }}</p>
                                                     </div>
                                                     @if (in_array($transaction_type, ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14']))
                                                         <div class="col-md-6">
@@ -228,27 +233,36 @@
                                                         </div>
                                                         <div class="col-12 mb-3">
                                                             <div class="alert alert-info mb-0">
-                                                                Barion sandbox mód. Az éles fizetés ebben a Food Pro példányban ki van kapcsolva.
-                                                                A visszatérési cím: <code>{{ route('barion.after') }}</code>.
-                                                                A callback cím: <code>{{ route('barion.callback') }}</code>.
+                                                                <strong>{{ trans('admin_ui.barion_test_title') }}</strong>
+                                                                <p class="mb-2">{{ trans('admin_ui.barion_test_help') }}</p>
+                                                                <details>
+                                                                    <summary>{{ trans('admin_ui.barion_technical_details') }}</summary>
+                                                                    <p class="admin-help-text mb-1">{{ trans('admin_ui.barion_redirect_label') }}: <code>{{ route('barion.after') }}</code></p>
+                                                                    <p class="admin-help-text mb-0">{{ trans('admin_ui.barion_callback_label') }}: <code>{{ route('barion.callback') }}</code></p>
+                                                                </details>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6 mb-3">
-                                                            <label class="form-label" for="barion_shop_email">Sandbox kereskedői e-mail</label>
+                                                            <label class="form-label" for="barion_shop_email">{{ trans('admin_ui.barion_shop_email_label') }}</label>
                                                             <input class="form-control" type="email" id="barion_shop_email"
                                                                 name="barion_shop_email" autocomplete="off"
                                                                 value="{{ old('barion_shop_email', $barionSetting->shop_email ?? '') }}">
+                                                            <p class="admin-help-text">{{ trans('admin_ui.barion_shop_email_help') }}</p>
                                                         </div>
                                                         <div class="col-md-6 mb-3">
-                                                            <label class="form-label" for="barion_poskey">Sandbox POSKey</label>
+                                                            <label class="form-label" for="barion_poskey">{{ trans('admin_ui.barion_poskey_label') }}</label>
                                                             <input class="form-control" type="password" id="barion_poskey"
                                                                 name="barion_poskey" autocomplete="new-password"
-                                                                placeholder="{{ !empty($barionSetting->poskey) ? 'Már beállítva; módosításhoz írj új kulcsot' : 'Add meg a sandbox POSKey-t' }}">
+                                                                placeholder="{{ trans(!empty($barionSetting->poskey) ? 'admin_ui.barion_poskey_saved' : 'admin_ui.barion_poskey_empty') }}">
+                                                            <p class="admin-help-text">{{ trans('admin_ui.barion_poskey_help') }}</p>
                                                         </div>
                                                         <div class="col-12">
-                                                            <p class="small text-muted">Mentés után a kapcsoló engedélyezi vagy tiltja ezt a fizetési módot a vásárlóknak.</p>
+                                                            <p class="admin-help-text">{{ trans('admin_ui.payment_toggle_help') }}</p>
                                                         </div>
                                                     @elseif($transaction_type == 1 || $transaction_type == 17)
+                                                        <div class="col-12">
+                                                            <p class="admin-help-text">{{ trans($transaction_type == 1 ? 'admin_ui.payment_cash_help' : 'admin_ui.payment_card_receipt_help') }}</p>
+                                                        </div>
                                                         <div class="col-md-6">
                                                             <label for="image" class="form-label">
                                                                 {{ trans('labels.image') }}
@@ -261,10 +275,12 @@
                                                     @endif
 
                                                     <div
-                                                        class="form-group d-flex justify-content-between align-items-center">
+                                                        class="form-group d-flex flex-wrap gap-3 justify-content-between align-items-center">
+                                                        <span class="fw-semibold">{{ trans('admin_ui.payment_available_label') }}</span>
                                                         <input id="checkbox-switch-{{ $transaction_type }}"
                                                             type="checkbox" class="checkbox-switch"
                                                             name="is_available[{{ $transaction_type }}]" value="1"
+                                                            aria-label="{{ trans('admin_ui.payment_available_label') }}"
                                                             {{ $pmdata->is_available == 1 ? 'checked' : '' }}>
                                                         <label for="checkbox-switch-{{ $transaction_type }}"
                                                             class="switch">

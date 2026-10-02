@@ -6,11 +6,11 @@
     <div class="navbar-header">
         <div class="">
             <button class="navbar-toggler d-lg-none d-md-block px-md-4 px-3" type="button" data-bs-toggle="collapse"
-                data-bs-target="#sidebarcollapse" aria-expanded="false" aria-controls="sidebarcollapse">
+                data-bs-target="#sidebarcollapse" aria-expanded="false" aria-controls="sidebarcollapse" aria-label="{{ trans('admin_ui.menu_open') }}">
                 <i class="fa-regular fa-bars fs-4"></i>
             </button>
         </div>
-        <div class="px-md-3 px-0 d-flex align-items-center">
+        <div class="px-md-3 px-0 admin-header-tools">
 
             @if (Auth::user()->type == 1)
                 @php $activeSkin = helper::appdata()->admin_skin ?? 'spring'; @endphp
@@ -38,34 +38,33 @@
             @endif
 
             @if (Auth::user()->type == 1 || Auth::user()->type == 4)
-                {{-- Étterem online/offline kapcsoló --}}
-                @if (helper::check_restaurant_closed() == 1 )
-                    @php $tooltiptitle = trans('messages.online_note'); @endphp
-                    <input id="open-close-switch" type="checkbox" class="checkbox-switch" name="open-close"
-                           value="1" checked
-                           @if (env('Environment') == 'sendbox') onclick="myFunction()" disabled
-                           @else onclick="changeStatus(2,'{{ URL::to('admin/change-status') }}')" @endif>
-                @else
-                    @php $tooltiptitle = trans('messages.offline_note'); @endphp
-                    <input id="open-close-switch" type="checkbox" class="checkbox-switch" name="open-close"
-                           value=""
-                           @if (env('Environment') == 'sendbox') onclick="myFunction()" disabled
-                           @else onclick="changeStatus(1,'{{ URL::to('admin/change-status') }}')" @endif>
-                @endif
-                <label for="open-close-switch" class="switch me-3" data-bs-toggle="tooltip" title="{{ $tooltiptitle }}">
-        <span class="{{ session()->get('direction') == 2 ? 'switch__circle-rtl' : 'switch__circle' }}">
-            <span class="switch__circle-inner"></span>
-        </span>
-                    <span class="switch__left {{ session()->get('direction') == 2 ? 'pe-2' : 'ps-2' }}">{{ trans('labels.off') }}</span>
-                    <span class="switch__right {{ session()->get('direction') == 2 ? 'ps-2' : 'pe-2' }}">{{ trans('labels.on') }}</span>
-                </label>
+                @php $onlineOrders = (int) \App\Models\User::whereIn('type', [1, 4])->value('is_online') === 1; @endphp
+                <div class="admin-service-control">
+                    <div class="form-check form-switch">
+                        <input id="open-close-switch" type="checkbox" class="form-check-input" name="open-close"
+                            value="{{ $onlineOrders ? '1' : '' }}" @checked($onlineOrders)
+                            aria-describedby="admin-ordering-help"
+                            @if (env('Environment') == 'sendbox') onclick="myFunction()" disabled
+                            @else onclick="changeStatus({{ $onlineOrders ? 2 : 1 }},'{{ URL::to('admin/change-status') }}')" @endif>
+                        <label for="open-close-switch" class="form-check-label admin-service-copy">
+                            <span><strong>{{ trans('admin_ui.online_orders') }}</strong>
+                                <span class="admin-service-state" data-active="{{ $onlineOrders ? 'true' : 'false' }}">{{ trans($onlineOrders ? 'admin_ui.online_enabled' : 'admin_ui.online_paused') }}</span>
+                                <small class="d-block" id="admin-ordering-help">{{ trans('admin_ui.online_help') }}</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
 
                 {{-- ÚJ: Kiszállítás BE/KI kapcsoló --}}
-                <form method="POST" action="{{ route('admin.toggleDelivery') }}" class="d-inline">
+                <form method="POST" action="{{ route('admin.toggleDelivery') }}" class="admin-service-control">
                     @csrf
                     @php $deliveryOn = (int)\App\Helpers\helper::app_setting('delivery_enabled', 1) === 1; @endphp
-                    <button type="submit" class="btn btn-sm {{ $deliveryOn ? 'btn-warning' : 'btn-success' }}">
-                        {{ $deliveryOn ? '🚚 Kiszállítás kikapcsolása' : '🚚 Kiszállítás bekapcsolása' }}
+                    <span class="admin-service-copy"><strong>{{ trans('labels.delivery') }}</strong>
+                        <span class="admin-service-state" data-active="{{ $deliveryOn ? 'true' : 'false' }}">{{ trans($deliveryOn ? 'admin_ui.delivery_enabled' : 'admin_ui.delivery_paused') }}</span>
+                    </span>
+                    <button type="submit" class="btn btn-sm {{ $deliveryOn ? 'btn-outline-secondary' : 'btn-outline-primary' }}"
+                        aria-label="{{ trans('labels.delivery') }}: {{ trans($deliveryOn ? 'admin_ui.pause' : 'admin_ui.enable') }}">
+                        {{ trans($deliveryOn ? 'admin_ui.pause' : 'admin_ui.enable') }}
                     </button>
                 </form>
             @endif
@@ -98,7 +97,7 @@
                     <!-- language-btn -->
                     <div class="dropdown d-block d-lg-none">
                         <a class="btn text-dark border dropdown-toggle px-3 py-1 fs-6" type="button"
-                            id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                            id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ trans('labels.language') }}">
                             <i class="fa-solid fa-globe fs-5"></i></a>
                         <ul class="dropdown-menu {{ session()->get('direction') == '2' ? 'min-dropdown-rtl' : 'min-dropdown' }}"
                             aria-labelledby="dropdownMenuButton1">
@@ -119,7 +118,7 @@
             @endif
             <div class="dropwdown d-inline-block">
                 <button class="btn header-item" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="{{ helper::image_path(Auth::user()->profile_image) }}">
+                    <img src="{{ helper::image_path(Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
                     <span class="d-none d-xxl-inline-block d-xl-inline-block ms-1">{{ Auth::user()->name }}</span>
                     <i class="fa-regular fa-angle-down d-none d-xxl-inline-block d-xl-inline-block"></i>
                 </button>

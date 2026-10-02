@@ -7,7 +7,11 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="card border-0">
-                    <div class="card-body">
+                    <div class="card-body admin-form-section">
+                        <div class="admin-section-intro">
+                            <h2 class="h5">{{ trans('admin_ui.time_title') }}</h2>
+                            <p>{{ trans('admin_ui.time_intro') }}</p>
+                        </div>
                         <div class="basic-form">
                             <form action="{{ URL::to('admin/time/store') }}" method="post">
                                 @csrf
@@ -34,6 +38,7 @@
                                                     </option>
                                                 </select>
                                             </div>
+                                            <p class="admin-help-text">{{ trans('admin_ui.interval_help') }}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-4 mb-lg-0">
@@ -44,10 +49,11 @@
                                                 placeholder="{{ trans('labels.perslot_booking_limit') }}"
                                                 aria-describedby="button-addon2"
                                                 value="{{ $settingsdata->perslot_booking_limit }}" required>
+                                            <p class="admin-help-text">{{ trans('admin_ui.slot_limit_help') }}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-4 form-group">
-                                        <label class="form-label" for="">{{ trans('labels.date_time') }}
+                                        <label class="form-label" for="ordertypedatetime-switch">{{ trans('admin_ui.scheduled_order_label') }}
                                         </label>
                                         <input id="ordertypedatetime-switch" type="checkbox" class="checkbox-switch"
                                             name="ordertypedatetime" value="1"
@@ -61,8 +67,13 @@
                                             <span
                                                 class="switch__right {{ session()->get('direction') == 2 ? 'ps-2' : 'pe-2' }}">{{ trans('labels.on') }}</span>
                                         </label>
+                                        <p class="admin-help-text">{{ trans('admin_ui.scheduled_order_help') }}</p>
                                     </div>
 
+                                </div>
+                                <div class="admin-section-intro mt-4">
+                                    <h2 class="h5">{{ trans('admin_ui.weekly_hours_title') }}</h2>
+                                    <p>{{ trans('admin_ui.weekly_hours_help') }}</p>
                                 </div>
                                 <div class="row mt-2">
                                     <label class="col-md-2 col-form-label"></label>

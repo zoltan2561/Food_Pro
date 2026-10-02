@@ -4,7 +4,11 @@
         @include('admin.breadcrumb')
         <div class="col-12">
             <div class="card border-0 box-shadow">
-                <div class="card-body">
+                <div class="card-body admin-form-section">
+                    <div class="admin-section-intro">
+                        <h2 class="h5">{{ trans('admin_ui.delivery_zone_title') }}</h2>
+                        <p>{{ trans('admin_ui.delivery_zone_intro') }}</p>
+                    </div>
                     <form action="{{ URL::to('admin/shippingarea/store') }}" method="POST">
                         @csrf
                         <div class="row">
@@ -14,6 +18,7 @@
                                         </span></label>
                                     <input type="text" class="form-control" name="name" value="{{ old('name') }}"
                                         placeholder="{{ trans('labels.area_name') }}" required>
+                                    <p class="admin-help-text">{{ trans('admin_ui.delivery_zone_name_help') }}</p>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">{{ trans('labels.delivery_charge') }}<span
@@ -21,6 +26,7 @@
                                     <input type="text" class="form-control numbers_only" name="delivery_charge"
                                         value="{{ old('delivery_charge') }}"
                                         placeholder="{{ trans('labels.delivery_charge') }}" required>
+                                    <p class="admin-help-text">{{ trans('admin_ui.delivery_zone_price_help') }}</p>
                                 </div>
                             </div>
                             <div class="form-group {{ session()->get('direction') == '2' ? 'text-start' : 'text-end' }}">

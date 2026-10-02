@@ -2,10 +2,14 @@
 @section('content')
     @include('admin.breadcrumb')
     <div class="container-fluid">
+        <div class="admin-section-intro">
+            <h2 class="h5">{{ trans('admin_ui.settings_title') }}</h2>
+            <p>{{ trans('admin_ui.settings_intro') }}</p>
+        </div>
         <div class="row settings">
             <div class="col-xl-3 mb-3">
                 <div class="card card-sticky-top border-0">
-                    <ul class="list-group list-options">
+                    <nav class="list-group list-options" aria-label="{{ trans('admin_ui.settings_sections_label') }}">
                         <a href="#edit_profile" data-tab="edit_profile"
                             class="list-group-item basicinfo p-3 list-item-secondary d-flex justify-content-between align-items-center active"
                             aria-current="true">{{ trans('labels.edit_profile') }}
@@ -49,7 +53,7 @@
                         </a>
                         <a href="#business_settings" data-tab="business_settings"
                             class="list-group-item basicinfo p-3 list-item-secondary d-flex justify-content-between align-items-center"
-                            aria-current="true"> {{ trans('labels.business_settings') }}
+                            aria-current="true"> {{ trans('admin_ui.settings_business_title') }}
                             <i class="fa-regular fa-angle-{{ session()->get('direction') == '2' ? 'left' : 'right' }}"></i>
                         </a>
                         <a href="#website_settings" data-tab="website_settings"
@@ -258,7 +262,7 @@
                             aria-current="true"> {{ trans('labels.other') }}
                             <i class="fa-regular fa-angle-{{ session()->get('direction') == '2' ? 'left' : 'right' }}"></i>
                         </a>
-                    </ul>
+                    </nav>
                 </div>
             </div>
 
@@ -274,6 +278,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_profile_help') }}</p>
                                         <form action="{{ URL::to('admin/edit-profile') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -343,6 +348,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_password_help') }}</p>
                                         <form action="{{ URL::to('admin/change-password') }}" method="post">
                                             @csrf
                                             <div class="row">
@@ -399,6 +405,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_contact_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -471,6 +478,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_seo_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -589,6 +597,7 @@
                                             {{ trans('labels.theme_settings') }}</h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_theme_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -723,9 +732,10 @@
                                 <div class="card border-0 box-shadow">
                                     <div class="card-header p-3 bg-secondary">
                                         <h5 class="text-white">
-                                            {{ trans('labels.business_settings') }}</h5>
+                                            {{ trans('admin_ui.settings_business_title') }}</h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_business_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -881,39 +891,42 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label class="col-form-label"
-                                                            for="">{{ trans('labels.max_order_qty') }}
+                                                            for="max_order_qty">{{ trans('admin_ui.settings_quantity_label') }}
                                                             <span class="text-danger">*</span></label>
                                                         <input type="text"
-                                                            placeholder="{{ trans('labels.max_order_qty') }}"
+                                                            placeholder="{{ trans('admin_ui.settings_quantity_label') }}"
                                                             value="{{ @$getsettings->max_order_qty == '' ? old('max_order_qty') : @$getsettings->max_order_qty }}"
                                                             class="form-control numbers_only" name="max_order_qty"
                                                             id="max_order_qty" required>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.settings_quantity_help') }}</p>
                                                     </div>
                                                 </div>
                                                 <!-- Min Amount -->
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label class="col-form-label"
-                                                            for="">{{ trans('labels.min_amount') }}
+                                                            for="min_order_amount">{{ trans('admin_ui.settings_minimum_label') }}
                                                             <span class="text-danger">*</span></label>
                                                         <input type="text"
-                                                            placeholder="{{ trans('labels.min_amount') }}"
+                                                            placeholder="{{ trans('admin_ui.settings_minimum_label') }}"
                                                             value="{{ @$getsettings->min_order_amount == '' ? old('min_order_amount') : @$getsettings->min_order_amount }}"
                                                             class="form-control numbers_only" name="min_order_amount"
                                                             id="min_order_amount" required>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.settings_minimum_help') }}</p>
                                                     </div>
                                                 </div>
                                                 <!-- Max Amount -->
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label class="col-form-label"
-                                                            for="">{{ trans('labels.max_amount') }}
+                                                            for="max_order_amount">{{ trans('admin_ui.settings_maximum_label') }}
                                                             <span class="text-danger">*</span></label>
                                                         <input type="text"
-                                                            placeholder="{{ trans('labels.max_amount') }}"
+                                                            placeholder="{{ trans('admin_ui.settings_maximum_label') }}"
                                                             value="{{ @$getsettings->max_order_amount == '' ? old('max_order_amount') : @$getsettings->max_order_amount }}"
                                                             class="form-control numbers_only" name="max_order_amount"
                                                             id="max_order_amount" required>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.settings_maximum_help') }}</p>
                                                     </div>
                                                 </div>
                                                 <!-- Maintenance Mode -->
@@ -935,6 +948,7 @@
                                                             <span
                                                                 class="switch__right {{ session()->get('direction') == 2 ? 'ps-2' : 'pe-2' }}">{{ trans('labels.on') }}</span>
                                                         </label>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.settings_maintenance_help') }}</p>
                                                     </div>
                                                 </div>
                                                 <!-- Online Table Booking -->
@@ -1095,6 +1109,8 @@
                                                                 'Europe/Amsterdam' ? 'selected' : '' }}>
                                                                 (GMT+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna
                                                             </option>
+                                                            <option value="Europe/Budapest" {{ @$getsettings->timezone ==
+                                                                'Europe/Budapest' ? 'selected' : '' }}>Europe/Budapest – Magyarország</option>
                                                             <option value="Europe/Belgrade" {{ @$getsettings->timezone ==
                                                                 'Europe/Belgrade' ? 'selected' : '' }}>
                                                                 (GMT+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague
@@ -1241,6 +1257,7 @@
                                                                 'Pacific/Kiritimati' ? 'selected' : '' }}>
                                                                 (GMT+14:00) Kiritimati</option>
                                                         </select>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.settings_timezone_help') }}</p>
                                                         @error('timezone')
                                                         <span class="text-danger">{{ $message }}</span>
                                                         @enderror
@@ -1310,6 +1327,7 @@
                                                                 {{ $getsettings->pickup_delivery == 3 ? 'selected' : '' }}>
                                                                 {{ trans('labels.pickup') }}</option>
                                                         </select>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.settings_fulfilment_help') }}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -1322,6 +1340,7 @@
                                                             value="{{ @$getsettings->order_prefix == '' ? old('order_prefix') : @$getsettings->order_prefix }}"
                                                             class="form-control" name="order_prefix" id="order_prefix"
                                                             required>
+                                                        <p class="admin-help-text">{{ trans('admin_ui.settings_prefix_help') }}</p>
                                                     </div>
                                                 </div>
                                                 @if (count($order) == 0)
@@ -1364,6 +1383,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_website_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -1470,6 +1490,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_social_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -1567,6 +1588,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_footer_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf
@@ -1711,6 +1733,7 @@
                                         </h5>
                                     </div>
                                     <div class="card-body">
+                                        <p class="admin-help-text">{{ trans('admin_ui.settings_mobile_help') }}</p>
                                         <form action="{{ URL::to('admin/settings/update') }}" method="post"
                                             enctype="multipart/form-data">
                                             @csrf

@@ -7,17 +7,19 @@
                 <form action="{{ URL::to('/admin/report') }}" class="my-3">
                     <div class="input-group col-md-12 ps-0 justify-content-end">
                         <div class="input-group-append col-auto px-1">
-                            <input type="date" class="form-control rounded" name="startdate"
+                            <label for="report-startdate" class="form-label">{{ trans('admin_ui.date_from') }}</label>
+                            <input type="date" class="form-control rounded" name="startdate" id="report-startdate"
                                 @isset($_GET['startdate']) value="{{ $_GET['startdate'] }}" @endisset
-                                aria-label="{{ trans('labels.type_and_enter') }}" aria-describedby="basic-addon2" required>
+                                required>
                         </div>
                         <div class="input-group-append col-auto px-1">
-                            <input type="date" class="form-control rounded" name="enddate"
+                            <label for="report-enddate" class="form-label">{{ trans('admin_ui.date_to') }}</label>
+                            <input type="date" class="form-control rounded" name="enddate" id="report-enddate"
                                 @isset($_GET['enddate']) value="{{ $_GET['enddate'] }}" @endisset
-                                aria-label="{{ trans('labels.type_and_enter') }}" aria-describedby="basic-addon2" required>
+                                required>
                         </div>
                         <div class="input-group-append">
-                            <button class="btn btn-primary rounded" type="submit">{{ trans('labels.fetch') }}</button>
+                            <button class="btn btn-primary rounded" type="submit">{{ trans('admin_ui.show_period') }}</button>
                         </div>
                     </div>
                 </form>

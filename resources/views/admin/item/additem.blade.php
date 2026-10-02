@@ -9,7 +9,11 @@
         <div class="row">
             <div class="col-12">
                 <div class="card border-0">
-                    <div class="card-body">
+                    <div class="card-body admin-form-section">
+                        <div class="admin-section-intro">
+                            <h2 class="h5">{{ trans('admin_ui.item_create_title') }}</h2>
+                            <p>{{ trans('admin_ui.item_intro') }}</p>
+                        </div>
                         <div id="privacy-policy-three" class="privacy-policy">
                             <form method="post" action="{{ URL::to('admin/item/store') }}" name="about" id="about"
                                 enctype="multipart/form-data">
@@ -30,6 +34,7 @@
                                                     </option>
                                                 @endforeach
                                             </select>
+                                            <p class="admin-help-text">{{ trans('admin_ui.item_category_help') }}</p>
                                             <span class="emsg text-danger"></span>
                                         </div>
                                     </div>
@@ -84,6 +89,7 @@
                                                     @endif
                                                 @endforeach
                                             </select>
+                                            <p class="admin-help-text">{{ trans('admin_ui.item_addon_group_help') }}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -97,7 +103,7 @@
                                                         @if (old('item_type') == 1) checked @endif>
                                                     <label class="form-check-label" for="veg">
                                                         <img src="{{ helper::image_path('veg.svg') }}" alt=""
-                                                            srcset=""> {{ trans('labels.veg') }}</label>
+                                                            srcset=""> {{ trans('admin_ui.food_type_vegetarian') }}</label>
                                                 </div>
                                                 <div class="form-check-inline w-100">
                                                     <input class="form-check-input me-0" type="radio" name="item_type"
@@ -106,13 +112,17 @@
                                                     <label class="form-check-label" for="nonveg">
                                                         <img src="{{ helper::image_path('nonveg.svg') }}" alt=""
                                                             srcset="">
-                                                        {{ trans('labels.nonveg') }}</label>
+                                                        {{ trans('admin_ui.food_type_nonvegetarian') }}</label>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
+                                    <div class="col-12 admin-section-intro mt-3">
+                                        <h2 class="h5">{{ trans('admin_ui.item_extras_title') }}</h2>
+                                        <p>{{ trans('admin_ui.item_extras_help') }}</p>
+                                    </div>
                                     <div class="col-md-12 d-flex flex-wrap justify-content-between align-items-center">
                                         <div class="form-group">
                                             <label class="col-form-label">{{ trans('labels.item_has_extras') }}</label>
@@ -143,7 +153,7 @@
                                             @endif
                                             <button class="btn btn-secondary px-3 mb-sm-0 mb-2" type="button" id="add_extra"
                                                 onclick="extras_fields('{{ trans('labels.name') }}','{{ trans('labels.price') }}')">
-                                                <i class="fa-sharp fa-solid fa-plus"></i> </button>
+                                                <i class="fa-sharp fa-solid fa-plus" aria-hidden="true"></i> {{ trans('admin_ui.item_add_extra') }}</button>
                                         </div>
                                     </div>
                                     <div id="extras">
@@ -154,6 +164,10 @@
                                     </div>
                                 </div>
                                 <div class="row">
+                                    <div class="col-12 admin-section-intro mt-3">
+                                        <h2 class="h5">{{ trans('admin_ui.item_price_title') }}</h2>
+                                        <p>{{ trans('admin_ui.item_price_intro') }}</p>
+                                    </div>
                                     <div class="col-sm-6 col-md-6">
                                         <div class="form-group">
                                             <label for="price"
@@ -171,6 +185,7 @@
                                             <input type="text" class="form-control numbers_only" name="original_price"
                                                 id="original_price" value="0"
                                                 placeholder="{{ trans('labels.original_price') }}">
+                                            <p class="admin-help-text">{{ trans('admin_ui.item_original_price_help') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -191,6 +206,7 @@
                                             <input type="text" class="form-control" name="preparation_time"
                                                 placeholder="{{ trans('labels.preparation_time') }}"
                                                 value="{{ old('preparation_time') }}" required>
+                                            <p class="admin-help-text">{{ trans('admin_ui.item_preparation_help') }}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -216,6 +232,7 @@
                                                 class="col-form-label">{{ trans('labels.description') }}</label>
                                             <textarea class="form-control" rows="5" name="description" id="description"
                                                 placeholder="{{ trans('labels.description') }}"></textarea>
+                                            <p class="admin-help-text">{{ trans('admin_ui.item_description_help') }}</p>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
@@ -224,6 +241,7 @@
                                                 class="col-form-label">{{ trans('labels.allergens') }}</label>
                                             <textarea class="form-control" rows="5" name="allergens" id="allergens"
                                                 placeholder="{{ trans('labels.allergens') }}"></textarea>
+                                            <p class="admin-help-text">{{ trans('admin_ui.item_allergens_help') }}</p>
                                         </div>
                                     </div>
                                 </div>

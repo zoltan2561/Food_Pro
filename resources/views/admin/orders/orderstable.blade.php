@@ -52,7 +52,7 @@
                         {{ helper::getpayment($orderdata->transaction_type) }}
                     @endif
                     @if ((int) $orderdata->transaction_type === 17 && (int) $orderdata->payment_status === 1)
-                        <span class="d-block badge bg-primary mt-1">Terminálos fizetés várható</span>
+                        <span class="d-block badge bg-primary mt-1">{{ trans('admin_ui.terminal_pending') }}</span>
                     @endif
                     <br>
                     @if ($orderdata->payment_status == 1)
@@ -81,21 +81,27 @@
                 </td>
                 <td>
                     <div class="d-flex flex-wrap gap-1">
-                        <a class="btn btn-sm btn-secondary square" tooltip="View" title="{{ trans('labels.view') }}"
+                        <a class="btn btn-sm btn-secondary square" tooltip="{{ trans('labels.view') }}" title="{{ trans('labels.view') }}" aria-label="{{ trans('labels.view') }}: {{ $orderdata->order_number }}"
                             href="{{ URL::to('admin/invoice/' . $orderdata->id) }}"><i
                                 class="fa-regular fa-eye"></i></a>
-                        <a class="btn btn-sm btn-primary square" tooltip="Print" title="{{ trans('labels.print') }}"
+                        <a class="btn btn-sm btn-primary square" tooltip="{{ trans('labels.print') }}" title="{{ trans('labels.print') }}" aria-label="{{ trans('labels.print') }}: {{ $orderdata->order_number }}"
                             href="{{ URL::to('admin/print/' . $orderdata->id) }}"><i
                                 class="fa-regular fa-print"></i></a>
                         <a href="{{ URL::to('admin/generatepdf/' . $orderdata->id) }}" class="btn btn-warning square"
-                            tooltip="Download PDF">
+                            tooltip="PDF" aria-label="PDF: {{ $orderdata->order_number }}">
                             <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
                         </a>
                         @if (in_array((int) $orderdata->transaction_type, [1, 17], true) && $orderdata->payment_status == 1 && $orderdata->status_type == 3)
-                            <a class="btn btn-sm btn-info square" title="Fizetés rögzítése"
-                                onclick="codpayment('{{ $orderdata->order_number }}','{{ $orderdata->grand_total }}', {{ (int) $orderdata->transaction_type }})"><i
-                                    class="fa-solid fa-file-invoice-dollar"></i>
-                            </a>
+                            @if (request()->is('admin/orders'))
+                                <button type="button" class="btn btn-sm btn-info square" title="{{ trans('admin_ui.record_payment') }}"
+                                    aria-label="{{ trans('admin_ui.record_payment') }}: {{ $orderdata->order_number }}"
+                                    onclick="codpayment('{{ $orderdata->order_number }}','{{ $orderdata->grand_total }}', {{ (int) $orderdata->transaction_type }})"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i></button>
+                            @else
+                                <a class="btn btn-sm btn-info square" href="{{ url('admin/invoice/' . $orderdata->id) }}"
+                                    title="{{ trans('admin_ui.order_details') }}" aria-label="{{ trans('admin_ui.order_details') }}: {{ $orderdata->order_number }}">
+                                    <i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i>
+                                </a>
+                            @endif
                         @endif
                     </div>
                 </td>

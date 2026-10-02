@@ -304,7 +304,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'admin'], function () {
 		Route::post('change-password', [AdminController::class, 'changepassword']);
 		Route::post('edit-profile', [AdminController::class, 'editprofile']);
 		Route::get('getorder', [AdminController::class, 'getorder']);
-		Route::get('change-status', [AdminController::class, 'changestatus']);
+		Route::post('change-status', [AdminController::class, 'changestatus']);
 		// bookings
 		Route::get('bookings', [BookingsController::class, 'bookings']);
 		Route::post('bookings/status', [BookingsController::class, 'bookingstatus']);

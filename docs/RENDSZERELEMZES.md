@@ -2,7 +2,7 @@
 
 Az elemzés a Food Pro vevőoldalát, adminját, rendelési és fizetési folyamatait, adatmodelljét és üzemeltetési alapjait vizsgálja. Célja egy modern, telefonon is könnyen használható éttermi rendelési rendszer. Ellenőrzési dátum: 2026. október 2.
 
-A projekt jó alap egyetlen étterem saját étlapjához, vendégrendeléséhez, elviteléhez és kiszállításához. Az üzembiztos éles használathoz azonban még szükséges a jogosultságok, kuponok, rendelési konkurencia és kapacitáskezelés javítása, valamint a támogatott keretrendszerre történő átállás. A jelen változtatás a vevőoldal mobilos használatát fejleszti; a jelentésben szereplő szerveroldali hiányokat külön fejlesztési feladatként rögzíti.
+A projekt jó alap egyetlen étterem saját étlapjához, vendégrendeléséhez, elviteléhez és kiszállításához. Az üzembiztos éles használathoz azonban még szükséges a jogosultságok, kuponok, rendelési konkurencia és kapacitáskezelés javítása, valamint a támogatott keretrendszerre történő átállás. Az elkészült változtatások a vevőoldal mobilos használatát és az admin érthetőségét fejlesztik. Az adminfejlesztés és annak legújabb ellenőrzései a dokumentum végén szerepelnek; a többi szerveroldali hiány külön fejlesztési feladat marad.
 
 ## Vizsgálati hatókör és bizonyíték
 
@@ -200,7 +200,7 @@ A kezdő SQL egyik WhatsApp seedértéke hitelesítőadatnak tűnik (`database/f
 - A riport tartalmazza a zárónap késő esti rendeléseit, és eltérő státuszazonosítókkal is a helyes üzleti státuszokat összesíti.
 - Levélküldési hiba nem veszít rendelést és nem okoz duplikációt; tényleges kézbesítés, nyomtatás és mentésből visszaállítás külön igazolt.
 
-## Ellenőrzések és átadási állapot
+## Vevőoldali fejlesztési kör: ellenőrzések és átadási állapot
 
 A próbák külön, Git által figyelmen kívül hagyott SQLite tesztadatbázison, PHP 8.3.35 alatt, csak `127.0.0.1:8093` címen futottak. A helyi levélküldő `log`, külső fizetés és üzenetküldés nincs bekapcsolva. A Composer lock és az alkalmazás általános környezetkonfigurációja nem változott.
 
@@ -224,3 +224,32 @@ Valódi iPhone/Android készülék, képernyőbillentyűzet és kijelzőszegély
 Képi bizonyítékok: [mobil étlap, 390 px](screenshots/mobile-menu.png), [kötelező köret modal, 320 px](screenshots/mobile-product-modal.jpg), [elviteles pénztár, 320 px](screenshots/mobile-checkout.png), [admin rendeléslista tesztrender](screenshots/admin-orders.png).
 
 **Vevőoldali mobilos változtatás:** helyben ellenőrzött, áttekinthető állapotban elkészült. **Teljes rendszer éles bevezetése:** a P0/P1 rendelési és adminhibák, platformfrissítés és a fenti üzemi próbák rendezéséig nem javasolt. A változtatások a helyi munkafában vannak; éles telepítés vagy Git push nem történt.
+
+## Elkészült adminfejlesztés – 2026. október 2.
+
+Az admin most a napi éttermi feladatok köré szerveződik. Az oldalak röviden leírják, mire valók, a bonyolultabb mezők mellett példák és magyarázatok segítenek. A változtatások közös adminfelületet, navigációt és hét fontos űrlapot érintenek.
+
+- **Navigáció:** Napi működés, Étlap, Éttermem, Vendégek és munkatársak, Weboldal és akciók, Beállítások. A menüpontok kereshetők ékezettel és ékezet nélkül; a keresés a lenyitható csoportokban is talál. A mobilmenü induláskor zárt, a két menüpéldány azonosítói egyediek.
+- **Kezdőlap:** gyakori feladatok gyorslinkjei, a mai rendelések a mutatók előtt, a weboldal szerkesztése külön lenyitható blokkban. A korábbi moduljogosultságok megmaradtak.
+- **Rendelések:** olvasható állapotjelzések, megnevezett műveletek, magyar listakeresés és lapozás. Rövid leírás különbözteti meg a kiszolgálási állapotot és a fizetettséget. A fizetés rögzítésére szolgáló modal a rendelésoldalon érhető el; a többi közös listanézet a rendelés részleteire vezet.
+- **Űrlapok:** magyarázatok a nyitvatartáshoz, szünethez, idősávhoz, kapacitáshoz, ételárakhoz, feltétcsoportokhoz, allergénekhez, kiszállítási körzetekhez és fizetési módokhoz. A Barion adminbeállítása tesztkörnyezetként van megnevezve; a technikai visszatérési címek lenyithatók.
+- **Beállítások:** külön minimumösszeg, maximumösszeg és darabszám felirat; választható `Europe/Budapest`. A témakörmenü kiemeli a választott szakaszt, asztali nézetben görgetés közben elérhető marad. A szakaszcímek a fix fejléc alatt láthatók.
+- **Megjelenés és mobil:** egységes kártyák, súgók, fókuszjelzések és kapcsolók. A telefonos fejléc két külön kártyán mutatja az online rendelést és a kiszállítást; a rendelési mutatók két oszlopban férnek el. A széles adatlisták saját görgethető keretükben maradnak.
+
+Az online rendelés kapcsolójánál javítva lett a kliens és az útvonal kérési módjának eltérése: a meglévő JavaScript POST kérést küldött, az útvonal korábban csak GET-et fogadott. Az útvonal most POST, az admin- és CSRF-védelem megmaradt. A fejléc ugyanazt az éttermi állapotforrást mutatja, amelyet a rendelési időzítés használ.
+
+| Végső ellenőrzés | Eredmény és korlát |
+| --- | --- |
+| Automatikus tesztek | **4/4 PASS.** Két meglévő alapteszt és két új regressziós teszt: a POST adminbelépést igényel, a GET nem változtathat rendelésfogadási állapotot. |
+| Hitelesített szerveroldali render | **12 adminvégpont HTTP 200:** rendelések, beállítások, étellista, nyitvatartás, fizetés, riport, étel hozzáadás/szerkesztés, körzet hozzáadás/szerkesztés, kategória- és feltétcsoport-hozzáadás. Ez a megjelenítést igazolja, nem az összes mentési folyamatot. |
+| Online rendelés kapcsoló | Külön helyi HTTP-kernel próba aktív CSRF-védelemmel: hibás token **419**, érvényes szüneteltetés/visszakapcsolás **200**, a rendelési időzítés zárt/nyitott állapotot kapott. Minden érintett admin/pultos állapota szinkronban volt; a tranzakció végén az eredeti adatállapot teljesen visszaállt. |
+| Reszponzív admin | **36/36 PASS:** kilenc oldal 320, 390, 768 és 1440 CSS px szélességen, Chrome-ban. Nincs oldalszintű vízszintes túlcsordulás vagy magától megnyíló mobilmenü. A dashboard és a tisztán mintarendeléseket mutató lista nézetszintű tesztrender; a valódi rendelésvégpont külön 200-as ellenőrzést kapott. |
+| Interakciók | Menünyitás/-zárás, ékezet nélküli és beágyazott menükeresés, nincs találat és visszaállítás sikeres; nincs dupla DOM-azonosító. A beállítási témaváltás, aktív jelölés és fejléc alatti cím sikeres. Az átvételkori kártyafizetés modalja megnyílt, a technikai fizetési súgó lenyitható. Fizetés vagy beállításmentés nem történt. |
+| Űrlap- és fordításellenőrzés | **815 eredeti** név/azonosító/célcím/érték/típus/kérési mód megmaradt; az időzónalistába egy új választási érték került. **146 fordítási kulcs** HU és EN nyelven egyaránt feloldható. |
+| Szintaxis és review | PHP/Blade/JS ellenőrzés sikeres. Az admin CSS **178 selectorát és 362 deklarációját** parser ellenőrizte hibamentesen. A független végső kódellenőrzés nem talált lényeges regressziót; `git diff --check` PASS. |
+
+A dashboard tényleges vezérlőjének korábban jelzett MySQL-specifikus lekérdezése SQLite alatt továbbra is 500-at ad. A kezdőlap új elrendezése nézetszinten ellenőrzött; a teljes dashboardvégponthoz MySQL-próba kell. A Barion súgója üres hitelesítőmezőkkel, memóriában létrehozott tesztmodellel lett ellenőrizve; ez nem szolgáltatói fizetéspróba. A reszponzív teszt nem helyettesít valódi telefonos, billentyűzetes és üzemi használati próbát.
+
+Képi bizonyítékok, kizárólag megjelölt mintarendelésekkel: [új rendeléslista](screenshots/admin-owner-orders.png), [beállítások és súgók](screenshots/admin-owner-settings.png), [mobilos admin, 390 px](screenshots/admin-owner-mobile.png).
+
+**Admin használhatósági fejlesztés:** helyben elkészült és ellenőrzött. Éles telepítés vagy Git push ebben a fejlesztési körben nem történt. A jelentés korábbi P0/P1 rendszerhibái továbbra is külön feladatok.
